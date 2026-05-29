@@ -6,6 +6,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <PackageId>StArray.Agent.Functions</PackageId>
+        <Version>0.1.0</Version>
+        <Authors>StArray</Authors>
+        <Description>Agent tool function library with source-generated AIFunction registration and Roslyn analyzers.</Description>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,6 +20,12 @@
       <ProjectReference Include="..\StArray.Agent.Functions.Diagnostics\StArray.Agent.Functions.Diagnostics.csproj"
                         OutputItemType="Analyzer"
                         ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <!-- 将 Diagnostics 分析器 DLL 打包到 NuGet 的 analyzers/ 目录 -->
+    <ItemGroup>
+        <None Include="..\StArray.Agent.Functions.Diagnostics\bin\$(Configuration)\netstandard2.0\StArray.Agent.Functions.Diagnostics.dll"
+              Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
     <ItemGroup>
