@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# Git pre-commit hook：扫描暂存区中的密钥模式并替换为占位符。
+# Git pre-commit hook: scan staged files for secret patterns and replace with placeholders.
+# 检测到 sk-xxx 格式密钥自动替换为 <your-api-key>
+# Detects sk-xxx formatted keys and auto-replaces with <your-api-key>
+set -euo pipefail
+
+# ---- 跳过规则 ----
+# ---- Skip rules ----
+skip_patterns=(
+    '\.example$'
+    '\.ps1$'
+    '\.sh$'
+)
+
+should_skip() {
+    local file="$1"
+    for p in "${skip_patterns[@]}"; do
+        if [[ "$file" =~ $p ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# ---- 替换规则 ----
+# ---- Replacement rules ----
+declare -A REPLACE_MAP=(
+    # 通用 OpenAI/API key 格式
+    # Generic OpenAI/API key format
+    ['sk-[A-Za-z0-9]{20,}']='<your-api-key>'
+    ['sk-proj-[A-Za-z0-9_\-]{20,}']='<your-api-key>'
+    # 环境变量赋值格式（保留键名，值替换为占位符）
+    # Environment variable assignment format (keep key name, replace value with placeholder)
+    ['(OPENAI_API_KEY\s*[:=]\s*)["'']?[^"''
+\s]+["'']?']='\1<your-api-key>'
+    ['(DEEPSEEK_API_KEY\s*[:=]\s*)["'']?[^"''
+\s]+["'']?']='\1<your-api-key>'
+    ['(AZURE_OPENAI_API_KEY\s*[:=]\s*)["'']?[^"''
+\s]+["'']?']='\1<your-api-key>'
+    ['(ANTHROPIC_API_KEY\s*[:=]\s*)["'']?[^"''
+\s]+["'']?']='\1<your-api-key>'
+    # Authorization Bearer token
+    # Authorization Bearer token
+    ['(Authorization:\s*Bearer\s+)\S+']='\1<your-token>'
+)
+
+# ---- 主逻辑 ----
+# ---- Main logic ----
+staged_files=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
+if [ -z "$staged_files" ]; then
+    exit 0
+fi
+
+has_issue=false
+
+while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    [ -f "$file" ] || continue
+
+    if should_skip "$file"; then
+        continue
+    fi
+
+    # 跳过已有占位符的文件（速查）
+    # Skip files that already have placeholders (quick check)
+    if grep -qE '<your-api-key>|<your-token>|<placeholder>' "$file" 2>/dev/null; then
+        continue
+    fi
+
+    new_content=""
+    changed=false
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        for pattern in "${!REPLACE_MAP[@]}"; do
+            replacement="${REPLACE_MAP[$pattern]}"
+            if [[ "$line" =~ $pattern ]]; then
+                new_line=$(printf '%s' "$line" | sed -E "s/$pattern/$replacement/g")
+                if [ "$new_line" != "$line" ]; then
+                    line="$new_line"
+                    changed=true
+                fi
+            fi
+        done
+        new_content+="$line"$'\n'
+    done < "$file"
+
+    if $changed; then
+        printf '%s' "$new_content" > "$file"
+        git add "$file"
+        echo -e "\e[33m⚠ 已从 $file 中移除疑似密钥，请检查替换是否正确。\e[0m"
+        echo -e "\e[33m⚠ Removed suspected secret from $file, please verify the replacement.\e[0m"
+        has_issue=true
+    fi
+done <<< "$staged_files"
+
+if $has_issue; then
+    echo ""
+    echo "======================================"
+    echo " ⚠ 检测到密钥并已自动替换为占位符。"
+    echo " ⚠ Secrets detected and auto-replaced with placeholders."
+    echo " 请检查替换结果后重新执行 git commit。"
+    echo " Please review the changes and re-run git commit."
+    echo "======================================"
+    echo ""
+    exit 1
+fi
+
+exit 0
+
+

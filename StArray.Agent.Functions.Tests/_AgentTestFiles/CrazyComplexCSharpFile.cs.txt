@@ -1,0 +1,2988 @@
+// ====================================================================================================
+// <copyright file="CrazyComplexCSharpFile.cs" company="StArray">
+//     Copyright (c) StArray. All rights reserved.
+//     Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+// ====================================================================================================
+// 警告：此文件专为智能体文件编辑工具测试设计，包含大量复杂结构。
+// WARNING: This file is designed specifically for testing agent file editing tools.
+// It contains intentionally complex and convoluted code structures.
+// ====================================================================================================
+
+#if DEBUG
+#define ENABLE_VERBOSE_LOGGING
+#define ENABLE_DIAGNOSTIC_TRACE
+#elif RELEASE
+#define OPTIMIZE_PERFORMANCE
+#define ENABLE_CACHING
+#endif
+
+#nullable enable
+
+global using System.Runtime.CompilerServices;
+global using System.Runtime.InteropServices;
+global using System.Runtime.Intrinsics;
+global using static System.Math;
+global using static System.Console;
+
+using System;
+using System.Buffers;
+using System.Buffers.Binary;
+using System.Buffers.Text;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Frozen;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
+using System.Diagnostics.Metrics;
+using System.Formats.Asn1;
+using System.Globalization;
+using System.IO;
+using System.IO.Compression;
+using System.IO.Enumeration;
+using System.IO.MemoryMappedFiles;
+using System.IO.Pipelines;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Numerics;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Reflection.Metadata;
+using System.Runtime.ExceptionServices;
+using System.Runtime.Intrinsics.X86;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters;
+using System.Security;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
+using System.Threading.Channels;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Schema;
+using System.Xml.Serialization;
+using System.Xml.XPath;
+using System.Xml.Xsl;
+
+// ====================================================================================================
+// 区域 1：复杂枚举和特性定义
+// Region 1: Complex enums and attribute definitions
+// ====================================================================================================
+#region Enums and Attributes
+
+namespace StArray.TestTools.Enums
+{
+
+[Flags]
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum FileAccessPermissions : long
+{
+    None = 0L,
+    Read = 1L << 0,
+    Write = 1L << 1,
+    Execute = 1L << 2,
+    Delete = 1L << 3,
+    Modify = Read | Write,
+    FullControl = Read | Write | Execute | Delete,
+    [System.ComponentModel.Description("所有者完全控制")]
+    OwnerFull = FullControl | (1L << 10),
+    [Obsolete("此权限已弃用，请使用 FullControl")]
+    AdminOnly = FullControl | (1L << 11),
+}
+
+[Flags]
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ProcessingFlags : ushort
+{
+    None = 0,
+    Passthrough = 1,
+    Validate = 2,
+    Transform = 4,
+    Compress = 8,
+    Encrypt = 16,
+    Decrypt = 32,
+    Sign = 64,
+    Verify = 128,
+    Archive = 256,
+    Index = 512,
+    [EditorBrowsable(EditorBrowsableState.Advanced)]
+    Internal_Reserved_1 = 1024,
+    [EditorBrowsable(EditorBrowsableState.Advanced)]
+    Internal_Reserved_2 = 2048,
+    DefaultProcessing = Validate | Transform,
+    FullProcessing = Validate | Transform | Compress | Encrypt | Sign | Archive | Index,
+    Maximum = 4095,
+}
+
+public enum SeverityLevel
+{
+    [System.ComponentModel.Description("调试信息")]
+    Trace = 0,
+    Debug = 1,
+    Information = 2,
+    Warning = 3,
+    Error = 4,
+    Critical = 5,
+    [EnumMember(Value = "FATAL_ERROR")]
+    Fatal = 6,
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 2：复杂泛型接口层次结构
+// Region 2: Complex generic interface hierarchy
+// ====================================================================================================
+#region Generic Interfaces
+
+namespace StArray.TestTools.Contracts
+{
+
+using StArray.TestTools.Enums;
+
+public interface IEntity<out TKey>
+    where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>
+{
+    TKey Id { get; }
+    DateTime CreatedAt { get; }
+    DateTime? ModifiedAt { get; }
+    string? CreatedBy { get; }
+    string? ModifiedBy { get; }
+}
+
+public interface IVersionable : ICloneable
+{
+    int Version { get; }
+    long Timestamp { get; }
+    byte[] GetChecksum();
+    bool IsExpired(TimeSpan maxAge);
+}
+
+public interface IAuditable<TUser>
+    where TUser : class
+{
+    TUser? CreatedBy { get; set; }
+    TUser? ModifiedBy { get; set; }
+    DateTime CreatedOn { get; set; }
+    DateTime? ModifiedOn { get; set; }
+}
+
+public interface IRepository<TEntity, in TKey>
+    where TEntity : class, IEntity<TKey>
+    where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>
+{
+    ValueTask<TEntity?> GetByIdAsync(TKey id, CancellationToken ct = default);
+    ValueTask<ImmutableArray<TEntity>> GetAllAsync(CancellationToken ct = default);
+    ValueTask<TEntity> AddAsync(TEntity entity, CancellationToken ct = default);
+    ValueTask<TEntity> UpdateAsync(TEntity entity, CancellationToken ct = default);
+    ValueTask<bool> DeleteAsync(TKey id, CancellationToken ct = default);
+    IAsyncEnumerable<TEntity> QueryAsync(
+        Func<TEntity, bool> predicate,
+        int skip = 0,
+        int take = 100,
+        CancellationToken ct = default);
+}
+
+public interface ICacheProvider : IDisposable
+{
+    ValueTask<T?> GetAsync<T>(string key, CancellationToken ct = default) where T : class;
+    ValueTask SetAsync<T>(string key, T value, TimeSpan? expiry = null, CancellationToken ct = default) where T : class;
+    ValueTask RemoveAsync(string key, CancellationToken ct = default);
+    ValueTask<bool> ExistsAsync(string key, CancellationToken ct = default);
+    ValueTask<long> CountAsync(CancellationToken ct = default);
+    ValueTask ClearAsync(CancellationToken ct = default);
+}
+
+public interface IProcessingPipeline<TInput, TOutput>
+{
+    IProcessingPipeline<TInput, TOutput> RegisterMiddleware(
+        Func<TInput, ProcessingFlags, Func<TInput, ProcessingFlags, ValueTask<TOutput>>, ValueTask<TOutput>> middleware,
+        int order = 0);
+
+    ValueTask<TOutput> ExecuteAsync(TInput input, ProcessingFlags flags = ProcessingFlags.DefaultProcessing, CancellationToken ct = default);
+}
+
+public interface IHierarchical<TSelf>
+    where TSelf : class, IHierarchical<TSelf>
+{
+    TSelf? Parent { get; }
+    IReadOnlyCollection<TSelf> Children { get; }
+    int Depth { get; }
+    int SiblingIndex { get; }
+    TSelf? Root { get; }
+    IEnumerable<TSelf> Ancestors { get; }
+    IEnumerable<TSelf> Descendants { get; }
+    IEnumerable<TSelf> Siblings { get; }
+}
+
+public interface IPipelineStage<T>
+{
+    string Name { get; }
+    ValueTask<T> ProcessAsync(T input, CancellationToken ct = default);
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 3：复杂抽象基类和部分类
+// Region 3: Complex abstract base class and partial classes
+// ====================================================================================================
+#region Abstract Base Classes
+
+namespace StArray.TestTools.Base
+{
+
+using StArray.TestTools.Contracts;
+using StArray.TestTools.Domain;
+using StArray.TestTools.Enums;
+
+[Serializable]
+[DebuggerDisplay("{DebuggerDisplayString,nq}")]
+public abstract class EntityBase<TKey> : IEntity<TKey>, IVersionable, IEquatable<EntityBase<TKey>>
+    where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>
+{
+    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> CachedProperties = new();
+    private static long _globalTimestamp;
+
+    private readonly object _lockObj = new();
+    private int _version;
+    private long _timestamp;
+    private byte[]? _checksum;
+    private bool _isDirty;
+
+    protected EntityBase()
+    {
+        Id = default!;
+        CreatedAt = DateTime.UtcNow;
+        _version = 1;
+        _timestamp = Interlocked.Increment(ref _globalTimestamp);
+    }
+
+    protected EntityBase(TKey id) : this()
+    {
+        Id = id;
+    }
+
+    public TKey Id { get; protected set; }
+    public DateTime CreatedAt { get; protected set; }
+    public DateTime? ModifiedAt { get; protected set; }
+    public string? CreatedBy { get; protected set; }
+    public string? ModifiedBy { get; protected set; }
+
+    public int Version
+    {
+        get => Volatile.Read(ref _version);
+        protected set => Volatile.Write(ref _version, value);
+    }
+
+    public long Timestamp => Volatile.Read(ref _timestamp);
+
+    public bool IsDirty
+    {
+        get => Volatile.Read(ref _isDirty);
+        protected set => Volatile.Write(ref _isDirty, value);
+    }
+
+    protected string DebuggerDisplayString =>
+        $"{{ Id = {Id}, Type = {GetType().Name}, Version = {Version}, Timestamp = {Timestamp} }}";
+
+    public byte[] GetChecksum()
+    {
+        if (_checksum is not null && !IsDirty)
+            return _checksum;
+
+        lock (_lockObj)
+        {
+            using var sha256 = SHA256.Create();
+            using var ms = new MemoryStream();
+            var writer = new BinaryWriter(ms);
+
+            writer.Write(Id?.ToString() ?? string.Empty);
+            writer.Write(CreatedAt.Ticks);
+            writer.Write(ModifiedAt?.Ticks ?? 0);
+            writer.Write(CreatedBy ?? string.Empty);
+            writer.Write(ModifiedBy ?? string.Empty);
+            writer.Write(Version);
+            writer.Write(Timestamp);
+            WriteChecksumData(writer);
+            writer.Flush();
+
+            _checksum = sha256.ComputeHash(ms.ToArray());
+            IsDirty = false;
+            return _checksum;
+        }
+    }
+
+    public bool IsExpired(TimeSpan maxAge)
+    {
+        var reference = ModifiedAt ?? CreatedAt;
+        return DateTime.UtcNow - reference > maxAge;
+    }
+
+    public object Clone()
+    {
+        var clone = (EntityBase<TKey>)MemberwiseClone();
+        clone._version = 1;
+        clone._timestamp = Interlocked.Increment(ref _globalTimestamp);
+        clone._checksum = null;
+        clone._isDirty = true;
+        return clone;
+    }
+
+    protected virtual void WriteChecksumData(BinaryWriter writer) { }
+
+    public virtual bool Equals(EntityBase<TKey>? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return EqualityComparer<TKey>.Default.Equals(Id, other.Id);
+    }
+
+    public override bool Equals(object? obj) =>
+        obj is EntityBase<TKey> other && Equals(other);
+
+    public override int GetHashCode() =>
+        EqualityComparer<TKey>.Default.GetHashCode(Id);
+
+    public static bool operator ==(EntityBase<TKey>? left, EntityBase<TKey>? right) =>
+        left?.Equals(right) ?? right is null;
+
+    public static bool operator !=(EntityBase<TKey>? left, EntityBase<TKey>? right) =>
+        !(left == right);
+
+    public override string ToString() =>
+        $"{GetType().Name}[Id={Id}, Ver={Version}]";
+}
+
+[Serializable]
+[DebuggerDisplay("{DebuggerDisplayString,nq}")]
+public abstract class AggregateRoot<TKey> : EntityBase<TKey>
+    where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>
+{
+    private readonly Queue<IDomainEvent> _domainEvents = new();
+
+    protected AggregateRoot() { }
+    protected AggregateRoot(TKey id) : base(id) { }
+
+    public IReadOnlyCollection<IDomainEvent> DomainEvents =>
+        _domainEvents.ToList().AsReadOnly();
+
+    protected void AddDomainEvent(IDomainEvent domainEvent)
+    {
+        lock (_domainEvents)
+        {
+            _domainEvents.Enqueue(domainEvent);
+        }
+    }
+
+    public IReadOnlyCollection<IDomainEvent> ClearDomainEvents()
+    {
+        lock (_domainEvents)
+        {
+            var events = _domainEvents.ToList();
+            _domainEvents.Clear();
+            return events;
+        }
+    }
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 4：复杂领域事件和值对象
+// Region 4: Complex domain events and value objects
+// ====================================================================================================
+#region Domain Events
+
+namespace StArray.TestTools.Domain
+{
+
+using StArray.TestTools.Serialization;
+
+public interface IDomainEvent
+{
+    Guid EventId { get; }
+    DateTime OccurredOn { get; }
+    string EventType { get; }
+    int Version { get; }
+}
+
+public abstract record DomainEvent : IDomainEvent
+{
+    public Guid EventId { get; init; } = Guid.NewGuid();
+    public DateTime OccurredOn { get; init; } = DateTime.UtcNow;
+    public string EventType => GetType().Name;
+    public int Version { get; init; } = 1;
+}
+
+public sealed record EntityCreated<TKey>(
+    TKey EntityId,
+    string EntityType,
+    string? CreatedBy,
+    IReadOnlyDictionary<string, object?> InitialValues
+) : DomainEvent where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>;
+
+public sealed record EntityUpdated<TKey>(
+    TKey EntityId,
+    string EntityType,
+    string? ModifiedBy,
+    IReadOnlyDictionary<string, (object? OldValue, object? NewValue)> ChangedProperties
+) : DomainEvent where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>;
+
+public sealed record EntityDeleted<TKey>(
+    TKey EntityId,
+    string EntityType,
+    string? DeletedBy,
+    DateTime DeletedAt
+) : DomainEvent where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>;
+
+[Serializable]
+[JsonConverter(typeof(ValueObjectJsonConverterFactory))]
+public readonly record struct Money : IComparable<Money>,
+    IAdditionOperators<Money, Money, Money>,
+    ISubtractionOperators<Money, Money, Money>,
+    IMultiplyOperators<Money, decimal, Money>,
+    IDivisionOperators<Money, decimal, Money>,
+    IEqualityOperators<Money, Money, bool>,
+    IComparable
+{
+    public static readonly Money Zero = new(0, CurrencyCode.USD);
+    public static readonly Money MaxValue = new(decimal.MaxValue, CurrencyCode.USD);
+
+    public decimal Amount { get; }
+    public CurrencyCode Currency { get; }
+
+    [JsonConstructor]
+    public Money(decimal amount, CurrencyCode currency)
+    {
+        Amount = currency == CurrencyCode.XXX
+            ? throw new ArgumentException("Currency cannot be unknown", nameof(currency))
+            : amount;
+        Currency = currency;
+    }
+
+    public Money Round(int decimals = 2, MidpointRounding mode = MidpointRounding.ToEven) =>
+        new(decimal.Round(Amount, decimals, mode), Currency);
+
+    public Money Convert(CurrencyCode targetCurrency, decimal exchangeRate) =>
+        targetCurrency == Currency
+            ? this
+            : new(Amount * exchangeRate, targetCurrency);
+
+    public int CompareTo(Money other)
+    {
+        if (Currency != other.Currency)
+            throw new InvalidOperationException(
+                $"Cannot compare {Currency} with {other.Currency}");
+        return Amount.CompareTo(other.Amount);
+    }
+
+    public int CompareTo(object? obj) =>
+        obj is Money other ? CompareTo(other) : throw new ArgumentException("Object is not Money");
+
+    public static Money operator +(Money left, Money right)
+    {
+        if (left.Currency != right.Currency)
+            throw new InvalidOperationException("Currency mismatch");
+        return new(left.Amount + right.Amount, left.Currency);
+    }
+
+    public static Money operator -(Money left, Money right)
+    {
+        if (left.Currency != right.Currency)
+            throw new InvalidOperationException("Currency mismatch");
+        return new(left.Amount - right.Amount, left.Currency);
+    }
+
+    public static Money operator *(Money left, decimal right) =>
+        new(left.Amount * right, left.Currency);
+
+    public static Money operator /(Money left, decimal right) =>
+        new(left.Amount / right, left.Currency);
+
+    public static explicit operator decimal(Money money) => money.Amount;
+
+    public override string ToString() =>
+        $"{Currency switch
+        {
+            CurrencyCode.USD => "$",
+            CurrencyCode.EUR => "€",
+            CurrencyCode.JPY => "¥",
+            CurrencyCode.GBP => "£",
+            CurrencyCode.CNY => "¥",
+            _ => Currency.ToString()
+        }}{Amount:N2}";
+}
+
+public enum CurrencyCode
+{
+    [System.ComponentModel.Description("Unknown Currency")]
+    XXX = 0,
+    [System.ComponentModel.Description("US Dollar")]
+    USD = 840,
+    [System.ComponentModel.Description("Euro")]
+    EUR = 978,
+    [System.ComponentModel.Description("Japanese Yen")]
+    JPY = 392,
+    [System.ComponentModel.Description("British Pound")]
+    GBP = 826,
+    [System.ComponentModel.Description("Chinese Yuan")]
+    CNY = 156,
+    [System.ComponentModel.Description("Swiss Franc")]
+    CHF = 756,
+    [System.ComponentModel.Description("Canadian Dollar")]
+    CAD = 124,
+    [System.ComponentModel.Description("Australian Dollar")]
+    AUD = 036,
+    [System.ComponentModel.Description("Hong Kong Dollar")]
+    HKD = 344,
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 5：复杂值对象转换器
+// Region 5: Complex value object JSON converter
+// ====================================================================================================
+#region JSON Converters
+
+namespace StArray.TestTools.Serialization
+{
+
+using StArray.TestTools.Domain;
+
+public class ValueObjectJsonConverterFactory : JsonConverterFactory
+{
+    private static readonly HashSet<Type> SupportedTypes =
+    [
+        typeof(Money),
+    ];
+
+    public override bool CanConvert(Type typeToConvert) =>
+        SupportedTypes.Contains(typeToConvert) ||
+        typeToConvert.GetCustomAttribute<JsonConverterAttribute>() is not null;
+
+    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (typeToConvert == typeof(Money))
+            return new MoneyJsonConverter();
+        return null;
+    }
+}
+
+public class MoneyJsonConverter : JsonConverter<Money>
+{
+    public override Money Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartObject)
+            throw new JsonException("Expected start of object");
+
+        decimal amount = 0;
+        var currency = CurrencyCode.USD;
+
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.EndObject)
+                return new Money(amount, currency);
+
+            if (reader.TokenType != JsonTokenType.PropertyName)
+                throw new JsonException("Expected property name");
+
+            var propName = reader.GetString()?.ToLowerInvariant() switch
+            {
+                "amount" or "ammount" or "value" => "amount",
+                "currency" or "curr" or "code" => "currency",
+                _ => null
+            };
+
+            reader.Read();
+
+            switch (propName)
+            {
+                case "amount":
+                    amount = reader.TokenType == JsonTokenType.String
+                        ? decimal.Parse(reader.GetString()!, CultureInfo.InvariantCulture)
+                        : reader.GetDecimal();
+                    break;
+                case "currency":
+                    currency = reader.TokenType == JsonTokenType.String
+                        ? Enum.Parse<CurrencyCode>(reader.GetString()!, ignoreCase: true)
+                        : (CurrencyCode)reader.GetInt32();
+                    break;
+            }
+        }
+
+        throw new JsonException("Unexpected end of JSON");
+    }
+
+    public override void Write(Utf8JsonWriter writer, Money value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+        writer.WriteNumber("amount", value.Amount);
+        writer.WriteString("currency", value.Currency.ToString());
+        writer.WriteString("formatted", value.ToString());
+        writer.WriteEndObject();
+    }
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 6：复杂实体实现
+// Region 6: Complex entity implementations
+// ====================================================================================================
+#region Entity Implementations
+
+namespace StArray.TestTools.Entities
+{
+
+using StArray.TestTools.Base;
+using StArray.TestTools.Domain;
+using StArray.TestTools.Contracts;
+
+[DebuggerDisplay("{DebuggerDisplayString,nq}")]
+public sealed partial class UserAccount : AggregateRoot<Guid>, IAuditable<string>, IHierarchical<UserAccount>
+{
+    private readonly List<UserAccount> _children = [];
+    private readonly List<LoginHistory> _loginHistory = [];
+    private string? _passwordHash;
+    private int _failedLoginAttempts;
+    private DateTime? _lockedUntil;
+
+    public DateTime? LockedUntil => _lockedUntil;
+
+    public UserAccount() : base() { }
+
+    public UserAccount(Guid id, string username, string email)
+        : base(id)
+    {
+        Username = username ?? throw new ArgumentNullException(nameof(username));
+        Email = email ?? throw new ArgumentNullException(nameof(email));
+        Status = AccountStatus.PendingActivation;
+        Roles = ImmutableHashSet<string>.Empty;
+        Permissions = ImmutableHashSet<string>.Empty;
+        Preferences = new UserPreferences();
+
+        AddDomainEvent(new EntityCreated<Guid>(
+            Id, nameof(UserAccount), CreatedBy,
+            new Dictionary<string, object?>
+            {
+                ["Username"] = username,
+                ["Email"] = email,
+                ["Status"] = Status.ToString(),
+            }));
+    }
+
+    public string Username { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
+    public string? DisplayName { get; set; }
+    public string? PhoneNumber { get; set; }
+    public AccountStatus Status { get; private set; }
+    public ImmutableHashSet<string> Roles { get; private set; }
+    public ImmutableHashSet<string> Permissions { get; private set; }
+    public UserPreferences Preferences { get; set; }
+    public IReadOnlyList<LoginHistory> LoginHistoryList => _loginHistory.AsReadOnly();
+
+    public UserAccount? Parent { get; private set; }
+    public IReadOnlyCollection<UserAccount> Children => _children.AsReadOnly();
+    public int Depth => Parent?.Depth + 1 ?? 0;
+    public int SiblingIndex => Parent?._children.IndexOf(this) ?? 0;
+    public UserAccount? Root => Parent?.Root ?? this;
+
+    public IEnumerable<UserAccount> Ancestors
+    {
+        get
+        {
+            var current = Parent;
+            while (current is not null)
+            {
+                yield return current;
+                current = current.Parent;
+            }
+        }
+    }
+
+    public IEnumerable<UserAccount> Descendants
+    {
+        get
+        {
+            foreach (var child in _children)
+            {
+                yield return child;
+                foreach (var descendant in child.Descendants)
+                    yield return descendant;
+            }
+        }
+    }
+
+    public IEnumerable<UserAccount> Siblings =>
+        Parent?._children.Where(c => c != this) ?? Enumerable.Empty<UserAccount>();
+
+    public void SetPassword(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+            throw new ArgumentException("Password cannot be empty", nameof(password));
+
+        if (password.Length < 8)
+            throw new ArgumentException("Password must be at least 8 characters");
+
+        if (!password.Any(char.IsUpper))
+            throw new ArgumentException("Password must contain an uppercase letter");
+
+        if (!password.Any(char.IsLower))
+            throw new ArgumentException("Password must contain a lowercase letter");
+
+        if (!password.Any(char.IsDigit))
+            throw new ArgumentException("Password must contain a digit");
+
+        if (!password.Any(c => !char.IsLetterOrDigit(c)))
+            throw new ArgumentException("Password must contain a special character");
+
+        _passwordHash = BCryptHash(password);
+        IsDirty = true;
+    }
+
+    public bool VerifyPassword(string password)
+    {
+        if (_passwordHash is null) return false;
+        return BCryptVerify(password, _passwordHash);
+    }
+
+    public bool TryLogin(string password)
+    {
+        if (_lockedUntil.HasValue && _lockedUntil.Value > DateTime.UtcNow)
+        {
+            _loginHistory.Add(new LoginHistory(DateTime.UtcNow, false, "Account locked"));
+            return false;
+        }
+
+        if (!VerifyPassword(password))
+        {
+            _failedLoginAttempts++;
+            _loginHistory.Add(new LoginHistory(DateTime.UtcNow, false, "Invalid password"));
+
+            if (_failedLoginAttempts >= 5)
+            {
+                _lockedUntil = DateTime.UtcNow.AddMinutes(15);
+                AddDomainEvent(new EntityUpdated<Guid>(
+                    Id, nameof(UserAccount), null,
+                    new Dictionary<string, (object?, object?)>
+                    {
+                        ["LockedUntil"] = (null, _lockedUntil),
+                    }));
+            }
+
+            return false;
+        }
+
+        _failedLoginAttempts = 0;
+        _lockedUntil = null;
+        Status = AccountStatus.Active;
+        _loginHistory.Add(new LoginHistory(DateTime.UtcNow, true, "Successful login"));
+        return true;
+    }
+
+    public void AssignRole(string role)
+    {
+        if (string.IsNullOrWhiteSpace(role))
+            throw new ArgumentException("Role cannot be empty", nameof(role));
+
+        Roles = Roles.Add(role);
+        IsDirty = true;
+    }
+
+    public void RemoveRole(string role)
+    {
+        Roles = Roles.Remove(role);
+        IsDirty = true;
+    }
+
+    public bool HasRole(string role) => Roles.Contains(role);
+
+    public void GrantPermission(string permission)
+    {
+        Permissions = Permissions.Add(permission);
+        IsDirty = true;
+    }
+
+    public void RevokePermission(string permission)
+    {
+        Permissions = Permissions.Remove(permission);
+        IsDirty = true;
+    }
+
+    public bool HasPermission(string permission) =>
+        Permissions.Contains(permission) || Roles.Any(r => r == "Administrator");
+
+    public void AddChild(UserAccount child)
+    {
+        ArgumentNullException.ThrowIfNull(child);
+        if (child.Parent is not null)
+            throw new InvalidOperationException("Child already has a parent");
+
+        if (Descendants.Contains(child) || child.Descendants.Contains(this))
+            throw new InvalidOperationException("Cannot create circular hierarchy");
+
+        _children.Add(child);
+        child.Parent = this;
+        IsDirty = true;
+    }
+
+    public void RemoveChild(UserAccount child)
+    {
+        if (_children.Remove(child))
+        {
+            child.Parent = null;
+            IsDirty = true;
+        }
+    }
+
+    public void Deactivate()
+    {
+        Status = AccountStatus.Deactivated;
+        ModifiedAt = DateTime.UtcNow;
+        IsDirty = true;
+
+        AddDomainEvent(new EntityUpdated<Guid>(
+            Id, nameof(UserAccount), null,
+            new Dictionary<string, (object?, object?)>
+            {
+                ["Status"] = (AccountStatus.Active, AccountStatus.Deactivated),
+            }));
+    }
+
+    private static string BCryptHash(string password)
+    {
+        using var sha256 = SHA256.Create();
+        var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        return Convert.ToBase64String(hash);
+    }
+
+    private static bool BCryptVerify(string password, string hash)
+    {
+        using var sha256 = SHA256.Create();
+        var computed = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        return CryptographicOperations.FixedTimeEquals(
+            Convert.FromBase64String(hash), computed);
+    }
+
+    string? IAuditable<string>.CreatedBy { get => CreatedBy; set => CreatedBy = value; }
+
+    string? IAuditable<string>.ModifiedBy { get => ModifiedBy; set => ModifiedBy = value; }
+
+    DateTime IAuditable<string>.CreatedOn
+    {
+        get => CreatedAt;
+        set => CreatedAt = value;
+    }
+
+    DateTime? IAuditable<string>.ModifiedOn
+    {
+        get => ModifiedAt;
+        set => ModifiedAt = value;
+    }
+}
+
+public partial class UserAccount
+{
+    public record UserPreferences
+    {
+        public string Theme { get; init; } = "Light";
+        public string Language { get; init; } = "zh-CN";
+        public int ItemsPerPage { get; init; } = 20;
+        public bool EnableNotifications { get; init; } = true;
+        public bool EnableTwoFactor { get; init; }
+        public NotificationPreferences NotificationPrefs { get; init; } = new();
+
+        public record NotificationPreferences
+        {
+            public bool EmailNotifications { get; init; } = true;
+            public bool SmsNotifications { get; init; }
+            public bool PushNotifications { get; init; } = true;
+            public bool DigestMode { get; init; }
+            public TimeSpan QuietHoursStart { get; init; } = new(22, 0, 0);
+            public TimeSpan QuietHoursEnd { get; init; } = new(7, 0, 0);
+        }
+    }
+
+    public readonly record struct LoginHistory(
+        DateTime Timestamp,
+        bool Success,
+        string? FailureReason)
+    {
+        public readonly TimeSpan Age => DateTime.UtcNow - Timestamp;
+    }
+}
+
+public enum AccountStatus
+{
+    [System.ComponentModel.Description("待激活")]
+    PendingActivation = 0,
+    [System.ComponentModel.Description("活跃")]
+    Active = 1,
+    [System.ComponentModel.Description("已停用")]
+    Deactivated = 2,
+    [System.ComponentModel.Description("已挂起")]
+    Suspended = 3,
+    [System.ComponentModel.Description("已删除")]
+    Deleted = 4,
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 7：复杂仓储实现
+// Region 7: Complex repository implementation
+// ====================================================================================================
+#region Repository
+
+namespace StArray.TestTools.Data
+{
+
+using StArray.TestTools.Base;
+using StArray.TestTools.Contracts;
+
+public sealed class InMemoryRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IDisposable
+    where TEntity : class, IEntity<TKey>
+    where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>
+{
+    private readonly ConcurrentDictionary<TKey, TEntity> _store = new();
+    private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.SupportsRecursion);
+    private readonly IEqualityComparer<TKey> _keyComparer;
+    private bool _disposed;
+
+    public InMemoryRepository(IEqualityComparer<TKey>? keyComparer = null)
+    {
+        _keyComparer = keyComparer ?? EqualityComparer<TKey>.Default;
+    }
+
+    public ValueTask<TEntity?> GetByIdAsync(TKey id, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        _lock.EnterReadLock();
+        try
+        {
+            return ValueTask.FromResult(
+                _store.TryGetValue(id, out var entity) ? entity : null);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public ValueTask<ImmutableArray<TEntity>> GetAllAsync(CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        _lock.EnterReadLock();
+        try
+        {
+            return ValueTask.FromResult(
+                _store.Values.ToImmutableArray());
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public ValueTask<TEntity> AddAsync(TEntity entity, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        _lock.EnterWriteLock();
+        try
+        {
+            if (!_store.TryAdd(entity.Id, entity))
+                throw new DuplicateNameException(
+                    $"Entity with key '{entity.Id}' already exists");
+            return ValueTask.FromResult(entity);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public ValueTask<TEntity> UpdateAsync(TEntity entity, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        _lock.EnterWriteLock();
+        try
+        {
+            if (!_store.ContainsKey(entity.Id))
+                throw new KeyNotFoundException(
+                    $"Entity with key '{entity.Id}' not found");
+
+            _store[entity.Id] = entity;
+            return ValueTask.FromResult(entity);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public ValueTask<bool> DeleteAsync(TKey id, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        _lock.EnterWriteLock();
+        try
+        {
+            return ValueTask.FromResult(_store.TryRemove(id, out _));
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public async IAsyncEnumerable<TEntity> QueryAsync(
+        Func<TEntity, bool> predicate,
+        int skip = 0,
+        int take = 100,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+
+        TEntity[] snapshot;
+        _lock.EnterReadLock();
+        try
+        {
+            snapshot = _store.Values.ToArray();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+
+        await foreach (var entity in FilterAsync(snapshot, predicate, skip, take, ct))
+        {
+            yield return entity;
+        }
+    }
+
+    private static async IAsyncEnumerable<TEntity> FilterAsync(
+        TEntity[] items,
+        Func<TEntity, bool> predicate,
+        int skip,
+        int take,
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        var count = 0;
+        var skipped = 0;
+
+        foreach (var item in items)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (!predicate(item)) continue;
+
+            if (skipped++ < skip) continue;
+            if (count++ >= take) yield break;
+
+            await Task.CompletedTask;
+            yield return item;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _lock?.Dispose();
+        _disposed = true;
+    }
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 8：复杂服务实现 — 管道处理、缓存、审计
+// Region 8: Complex service implementations — pipeline, cache, audit
+// ====================================================================================================
+#region Services
+
+namespace StArray.TestTools.Services
+{
+
+using StArray.TestTools.Contracts;
+using StArray.TestTools.Enums;
+using Microsoft.Extensions.Caching.Memory;
+
+public sealed class ProcessingPipeline<TInput, TOutput> : IProcessingPipeline<TInput, TOutput>
+{
+    private readonly List<PipelineMiddleware> _middlewares = [];
+
+    public IProcessingPipeline<TInput, TOutput> RegisterMiddleware(
+        Func<TInput, ProcessingFlags, Func<TInput, ProcessingFlags, ValueTask<TOutput>>, ValueTask<TOutput>> middleware,
+        int order = 0)
+    {
+        _middlewares.Add(new PipelineMiddleware(middleware, order));
+        _middlewares.Sort((a, b) => a.Order.CompareTo(b.Order));
+        return this;
+    }
+
+    public ValueTask<TOutput> ExecuteAsync(TInput input, ProcessingFlags flags, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+
+        if (_middlewares.Count == 0)
+            throw new InvalidOperationException("No middleware registered");
+
+        var index = 0;
+
+        async ValueTask<TOutput> Next(TInput innerInput, ProcessingFlags innerFlags)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (index >= _middlewares.Count)
+                throw new InvalidOperationException("Pipeline terminated without final handler");
+
+            var middleware = _middlewares[index++];
+            return await middleware.Handler(innerInput, innerFlags, Next);
+        }
+
+        return Next(input, flags);
+    }
+
+    private readonly record struct PipelineMiddleware(
+        Func<TInput, ProcessingFlags, Func<TInput, ProcessingFlags, ValueTask<TOutput>>, ValueTask<TOutput>> Handler,
+        int Order);
+}
+
+public sealed class HybridCacheProvider : ICacheProvider
+{
+    private readonly MemoryCache _memoryCache;
+    private readonly IDistributedCache? _distributedCache;
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
+    private readonly TimeSpan _defaultExpiry = TimeSpan.FromMinutes(5);
+
+    public HybridCacheProvider(MemoryCache memoryCache, IDistributedCache? distributedCache = null)
+    {
+        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+        _distributedCache = distributedCache;
+    }
+
+    public async ValueTask<T?> GetAsync<T>(string key, CancellationToken ct = default)
+        where T : class
+    {
+        ct.ThrowIfCancellationRequested();
+
+        if (_memoryCache.TryGetValue(key, out var cached) && cached is T memValue)
+            return memValue;
+
+        if (_distributedCache is null) return null;
+
+        var distributed = await _distributedCache.GetAsync(key, ct);
+        if (distributed is null) return null;
+
+        var value = Deserialize<T>(distributed);
+        if (value is not null)
+        {
+            _memoryCache.Set(key, value, _defaultExpiry);
+        }
+
+        return value;
+    }
+
+    public async ValueTask SetAsync<T>(string key, T value, TimeSpan? expiry = null, CancellationToken ct = default)
+        where T : class
+    {
+        ct.ThrowIfCancellationRequested();
+
+        var semaphore = _locks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
+        await semaphore.WaitAsync(ct);
+        try
+        {
+            _memoryCache.Set(key, value, expiry ?? _defaultExpiry);
+
+            if (_distributedCache is not null)
+            {
+                var serialized = Serialize(value);
+                await _distributedCache.SetAsync(key, serialized, expiry ?? _defaultExpiry, ct);
+            }
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
+    public ValueTask RemoveAsync(string key, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        _memoryCache.Remove(key);
+        _distributedCache?.Remove(key);
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask<bool> ExistsAsync(string key, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(_memoryCache.TryGetValue(key, out _));
+    }
+
+    public ValueTask<long> CountAsync(CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(0L);
+    }
+
+    public ValueTask ClearAsync(CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        _memoryCache.Clear();
+        _locks.Clear();
+        return ValueTask.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        _memoryCache.Dispose();
+        foreach (var sem in _locks.Values)
+            sem.Dispose();
+        _locks.Clear();
+    }
+
+    private static byte[] Serialize<T>(T value) where T : class =>
+        JsonSerializer.SerializeToUtf8Bytes(value);
+
+    private static T? Deserialize<T>(byte[] data) where T : class =>
+        JsonSerializer.Deserialize<T>(data);
+}
+
+    /// <summary>
+    /// 线程安全的内存缓存，支持过期时间。
+    /// Thread-safe in-memory cache with expiration support.
+    /// </summary>
+    public class MemoryCache : IDisposable
+    {
+        private readonly ConcurrentDictionary<string, CacheEntry> _cache = new();
+        private readonly Timer _cleanupTimer;
+        private readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(1);
+        private bool _disposed;
+
+        public MemoryCache()
+        {
+            _cleanupTimer = new Timer(CleanupExpiredEntries, null, _cleanupInterval, _cleanupInterval);
+        }
+
+        /// <summary>
+        /// 尝试从缓存中获取值。 / Tries to get a value from the cache.
+        /// </summary>
+        public bool TryGetValue(string key, out object? value)
+        {
+            ThrowIfDisposed();
+
+            if (_cache.TryGetValue(key, out var entry))
+            {
+                if (entry.ExpiresAt > DateTime.UtcNow)
+                {
+                    value = entry.Value;
+                    return true;
+                }
+
+                // 过期则移除 / Remove if expired
+                _cache.TryRemove(key, out _);
+            }
+
+            value = null;
+            return false;
+        }
+
+        /// <summary>
+        /// 将值存入缓存，支持可选的过期时间。
+        /// Stores a value in the cache with an optional expiration time.
+        /// </summary>
+        public void Set(string key, object? value, TimeSpan? expiry = null)
+        {
+            ThrowIfDisposed();
+
+            var expiresAt = expiry.HasValue
+                ? DateTime.UtcNow.Add(expiry.Value)
+                : DateTime.MaxValue;
+
+            _cache[key] = new CacheEntry(value, expiresAt);
+        }
+
+        /// <summary>
+        /// 从缓存中移除指定键。 / Removes the specified key from the cache.
+        /// </summary>
+        public void Remove(string key)
+        {
+            ThrowIfDisposed();
+            _cache.TryRemove(key, out _);
+        }
+
+        /// <summary>
+        /// 清空所有缓存条目。 / Clears all cache entries.
+        /// </summary>
+        public void Clear()
+        {
+            ThrowIfDisposed();
+            _cache.Clear();
+        }
+
+        /// <summary>
+        /// 获取当前缓存条目数量。 / Gets the current number of cache entries.
+        /// </summary>
+        public int Count => _cache.Count;
+
+        /// <summary>
+        /// 清理过期条目。 / Cleans up expired entries.
+        /// </summary>
+        private void CleanupExpiredEntries(object? state)
+        {
+            if (_disposed) return;
+
+            var now = DateTime.UtcNow;
+            foreach (var kvp in _cache)
+            {
+                if (kvp.Value.ExpiresAt <= now)
+                {
+                    _cache.TryRemove(kvp.Key, out _);
+                }
+            }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(MemoryCache));
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            _cleanupTimer?.Dispose();
+            _cache.Clear();
+        }
+
+        /// <summary>
+        /// 缓存条目，包含值和过期时间。
+        /// Cache entry containing the value and expiration time.
+        /// </summary>
+        private readonly record struct CacheEntry(object? Value, DateTime ExpiresAt);
+    }
+
+    public interface IDistributedCache
+{
+    ValueTask<byte[]?> GetAsync(string key, CancellationToken ct = default);
+    ValueTask SetAsync(string key, byte[] value, TimeSpan? expiry = null, CancellationToken ct = default);
+    void Remove(string key);
+}
+
+public sealed class AuditService
+{
+    private readonly Channel<AuditEntry> _channel =
+        Channel.CreateBounded<AuditEntry>(new BoundedChannelOptions(1000)
+        {
+            FullMode = BoundedChannelFullMode.DropOldest,
+            SingleWriter = false,
+            SingleReader = true,
+        });
+
+    private readonly CancellationTokenSource _cts = new();
+
+    public AuditService()
+    {
+        _ = ProcessAuditQueueAsync(_cts.Token);
+    }
+
+    public void Record(string action, string entityType, string entityId, string? userId, string? details = null)
+    {
+        var entry = new AuditEntry
+        {
+            Timestamp = DateTime.UtcNow,
+            Action = action,
+            EntityType = entityType,
+            EntityId = entityId,
+            UserId = userId,
+            Details = details,
+            CorrelationId = Activity.Current?.Id ?? Guid.NewGuid().ToString(),
+        };
+
+        _channel.Writer.TryWrite(entry);
+    }
+
+    private async Task ProcessAuditQueueAsync(CancellationToken ct)
+    {
+        var batch = new List<AuditEntry>(100);
+
+        await foreach (var entry in _channel.Reader.ReadAllAsync(ct))
+        {
+            batch.Add(entry);
+
+            if (batch.Count >= 100)
+            {
+                await PersistBatchAsync(batch, ct);
+                batch.Clear();
+            }
+        }
+    }
+
+    private static async Task PersistBatchAsync(List<AuditEntry> batch, CancellationToken ct)
+    {
+        var json = JsonSerializer.Serialize(batch, new JsonSerializerOptions
+        {
+            WriteIndented = false,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        });
+
+        var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "audit_logs");
+        Directory.CreateDirectory(dir);
+
+        var file = Path.Combine(dir, $"audit_{DateTime.UtcNow:yyyyMMdd_HHmmss}.jsonl");
+
+        await File.AppendAllTextAsync(file, json + Environment.NewLine, ct);
+    }
+
+    public void Shutdown()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
+    public readonly struct AuditEntry
+    {
+        public DateTime Timestamp { get; init; }
+        public string Action { get; init; }
+        public string EntityType { get; init; }
+        public string EntityId { get; init; }
+        public string? UserId { get; init; }
+        public string? Details { get; init; }
+        public string? CorrelationId { get; init; }
+    }
+}
+
+}
+#endregion
+
+
+// ====================================================================================================
+// 区域 10：复杂扩展方法
+// Region 10: Complex extension methods
+// ====================================================================================================
+#region Extensions
+
+namespace StArray.TestTools.Extensions
+{
+
+using StArray.TestTools.Contracts;
+using StArray.TestTools.Enums;
+
+public static class EntityExtensions
+{
+    public static bool IsNew<TKey>(this IEntity<TKey> entity)
+        where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey> =>
+        EqualityComparer<TKey>.Default.Equals(entity.Id, default);
+
+    public static bool HasChangedSince<TKey>(this IEntity<TKey> entity, DateTime since)
+        where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey> =>
+        entity.ModifiedAt is not null && entity.ModifiedAt > since;
+
+    public static TEntity CloneAsNew<TEntity, TKey>(this TEntity entity)
+        where TEntity : class, IEntity<TKey>, ICloneable
+        where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey>
+    {
+        var clone = (TEntity)entity.Clone();
+        return clone;
+    }
+}
+
+public static class ProcessingFlagsExtensions
+{
+    public static bool HasFlagFast(this ProcessingFlags flags, ProcessingFlags flag) =>
+        ((ushort)flags & (ushort)flag) == (ushort)flag;
+
+    public static bool HasAnyFlag(this ProcessingFlags flags, ProcessingFlags testFlags) =>
+        ((ushort)flags & (ushort)testFlags) != 0;
+
+    public static ProcessingFlags AddFlag(this ProcessingFlags flags, ProcessingFlags flag) =>
+        (ProcessingFlags)((ushort)flags | (ushort)flag);
+
+    public static ProcessingFlags RemoveFlag(this ProcessingFlags flags, ProcessingFlags flag) =>
+        (ProcessingFlags)((ushort)flags & ~(ushort)flag);
+
+    public static string ToFlagString(this ProcessingFlags flags)
+    {
+        if (flags == ProcessingFlags.None) return "None";
+
+        return string.Join(" | ",
+            Enum.GetValues<ProcessingFlags>()
+                .Where(f => f != ProcessingFlags.None && f != ProcessingFlags.Maximum &&
+                            f != ProcessingFlags.DefaultProcessing &&
+                            f != ProcessingFlags.FullProcessing &&
+                            flags.HasFlagFast(f))
+                .Select(f => f.ToString()));
+    }
+}
+
+public static class TaskExtensions
+{
+    public static async Task<T> WithTimeout<T>(this Task<T> task, TimeSpan timeout)
+    {
+        using var cts = new CancellationTokenSource();
+        var completed = await Task.WhenAny(task, Task.Delay(timeout, cts.Token));
+        if (completed != task)
+            throw new TimeoutException($"Task timed out after {timeout}");
+
+        cts.Cancel();
+        return await task;
+    }
+
+    public static async Task<T> RetryAsync<T>(
+        this Func<Task<T>> operation,
+        int maxRetries = 3,
+        TimeSpan? delay = null,
+        CancellationToken ct = default)
+    {
+        var currentDelay = delay ?? TimeSpan.FromMilliseconds(100);
+
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                return await operation();
+            }
+            catch (Exception ex) when (attempt < maxRetries &&
+                ex is not OperationCanceledException)
+            {
+                await Task.Delay(currentDelay, ct);
+                currentDelay = TimeSpan.FromMilliseconds(
+                    currentDelay.TotalMilliseconds * 2);
+            }
+        }
+
+        return await operation();
+    }
+
+    public static async IAsyncEnumerable<T> TapAsync<T>(
+        this IAsyncEnumerable<T> source,
+        Action<T> sideEffect,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        await foreach (var item in source.WithCancellation(ct))
+        {
+            sideEffect(item);
+            yield return item;
+        }
+    }
+}
+
+public static class StringExtensions
+{
+    public static bool IsNullOrWhiteSpace([NotNullWhen(false)] this string? value) =>
+        string.IsNullOrWhiteSpace(value);
+
+    public static bool IsNullOrEmpty([NotNullWhen(false)] this string? value) =>
+        string.IsNullOrEmpty(value);
+
+    public static string Truncate(this string value, int maxLength, string suffix = "...")
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        if (maxLength < 0)
+            throw new ArgumentOutOfRangeException(nameof(maxLength));
+
+        if (value.Length <= maxLength) return value;
+
+        return value[..Math.Max(0, maxLength - suffix.Length)] + suffix;
+    }
+
+    public static string ToCamelCase(this string value)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length == 1)
+            return value.ToLowerInvariant();
+
+        return char.ToLowerInvariant(value[0]) + value[1..];
+    }
+
+    public static string ToPascalCase(this string value)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length == 1)
+            return value.ToUpperInvariant();
+
+        return char.ToUpperInvariant(value[0]) + value[1..];
+    }
+
+    public static string ToKebabCase(this string value) =>
+        Regex.Replace(
+            Regex.Replace(value, "([a-z])([A-Z])", "$1-$2"),
+            "([A-Z]+)([A-Z][a-z])", "$1-$2",
+            RegexOptions.Compiled).ToLowerInvariant();
+}
+
+public static class EnumerableExtensions
+{
+    public static IEnumerable<T> Paginate<T>(this IEnumerable<T> source, int page, int pageSize) =>
+        source.Skip((page - 1) * pageSize).Take(pageSize);
+
+    public static async IAsyncEnumerable<T[]> BatchAsync<T>(
+        this IAsyncEnumerable<T> source,
+        int batchSize,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        var batch = new List<T>(batchSize);
+        await foreach (var item in source.WithCancellation(ct))
+        {
+            batch.Add(item);
+            if (batch.Count >= batchSize)
+            {
+                yield return batch.ToArray();
+                batch.Clear();
+            }
+        }
+
+        if (batch.Count > 0)
+            yield return batch.ToArray();
+    }
+
+    public static T? Median<T>(this IEnumerable<T> source) where T : struct, IComparable<T>
+    {
+        var sorted = source.OrderBy(x => x).ToList();
+        if (sorted.Count == 0) return null;
+        return sorted[sorted.Count / 2];
+    }
+
+    public static (T? Min, T? Max) Range<T>(this IEnumerable<T> source)
+        where T : struct, IComparable<T>
+    {
+        T? min = null, max = null;
+        foreach (var item in source)
+        {
+            if (min is null || item.CompareTo(min.Value) < 0) min = item;
+            if (max is null || item.CompareTo(max.Value) > 0) max = item;
+        }
+        return (min, max);
+    }
+
+    public static IEnumerable<(T Item, int Index)> WithIndex<T>(this IEnumerable<T> source) =>
+        source.Select((item, index) => (item, index));
+
+    public static Dictionary<TKey, TValue> ToFrozenDictionary<TKey, TValue>(
+        this IEnumerable<KeyValuePair<TKey, TValue>> source)
+        where TKey : notnull =>
+        source.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+    public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> source) =>
+        source.SelectMany(x => x);
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 11：复杂 LINQ 和数据处理
+// Region 11: Complex LINQ and data processing
+// ====================================================================================================
+#region Data Processing
+
+namespace StArray.TestTools.DataProcessing
+{
+
+using StArray.TestTools.Contracts;
+
+public static class DataTransformer
+{
+    public static IEnumerable<TResult> ComplexTransform<TSource, TResult>(
+        IEnumerable<TSource> source,
+        Func<TSource, bool>? filter = null,
+        Func<TSource, TResult>? projector = null,
+        Func<IEnumerable<TResult>, IEnumerable<TResult>>? postProcessor = null)
+    {
+        var query = source.AsEnumerable();
+
+        if (filter is not null)
+            query = query.Where(filter);
+
+        var projected = projector is not null
+            ? query.Select(projector)
+            : query.Cast<TResult>();
+
+        if (postProcessor is not null)
+            projected = postProcessor(projected);
+
+        return projected;
+    }
+
+    public static IReadOnlyDictionary<TGroupKey, ImmutableArray<TSource>> GroupAndAggregate<TSource, TGroupKey, TAggregate>(
+        IEnumerable<TSource> source,
+        Func<TSource, TGroupKey> keySelector,
+        Func<IGrouping<TGroupKey, TSource>, TAggregate> aggregator,
+        Func<TAggregate, bool>? aggregateFilter = null)
+        where TGroupKey : notnull
+    {
+        var groups = source
+            .GroupBy(keySelector)
+            .ToDictionary(g => g.Key, g => aggregator(g));
+
+        if (aggregateFilter is not null)
+        {
+            foreach (var key in groups.Keys.Where(k => !aggregateFilter(groups[k])).ToList())
+                groups.Remove(key);
+        }
+
+        return source
+            .GroupBy(keySelector)
+            .ToImmutableDictionary(g => g.Key, g => g.ToImmutableArray());
+    }
+
+    public static IEnumerable<(TSource Item, double Percentile)> ComputePercentiles<TSource>(
+        IEnumerable<TSource> source,
+        Func<TSource, double> valueSelector,
+        params int[] percentiles)
+    {
+        var sorted = source.Select(valueSelector).OrderBy(v => v).ToList();
+        var count = sorted.Count;
+
+        if (count == 0) yield break;
+
+        foreach (var p in percentiles.Distinct().OrderBy(x => x))
+        {
+            if (p < 0 || p > 100)
+                throw new ArgumentOutOfRangeException(nameof(percentiles), "Percentile must be between 0 and 100");
+
+            var index = (int)Ceiling(p / 100.0 * count) - 1;
+            index = Max(0, Min(index, count - 1));
+
+            yield return (source.ElementAt(index), p);
+        }
+    }
+
+    public static IReadOnlyList<(string Property, Type Type, object? Value)> Diff<T>(
+        T left,
+        T right,
+        params string[]? excludeProperties)
+    {
+        var excludeSet = excludeProperties?.ToHashSet() ?? [];
+        var type = typeof(T);
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.CanRead && !excludeSet.Contains(p.Name));
+
+        var differences = new List<(string, Type, object?)>();
+
+        foreach (var prop in properties)
+        {
+            var leftValue = prop.GetValue(left);
+            var rightValue = prop.GetValue(right);
+
+            if (!Equals(leftValue, rightValue))
+            {
+                differences.Add((prop.Name, prop.PropertyType, (leftValue, rightValue)));
+            }
+        }
+
+        return differences;
+    }
+}
+
+public sealed class DataStreamProcessor
+{
+    private readonly Channel<object> _inputChannel =
+        Channel.CreateUnbounded<object>(new UnboundedChannelOptions
+        {
+            SingleWriter = false,
+            SingleReader = true,
+        });
+
+    private readonly Channel<object> _outputChannel =
+        Channel.CreateUnbounded<object>(new UnboundedChannelOptions
+        {
+            SingleWriter = true,
+            SingleReader = false,
+        });
+
+    private readonly List<IPipelineStage<object>> _stages = [];
+    private readonly CancellationTokenSource _cts = new();
+    private Task? _processingTask;
+
+    public DataStreamProcessor AddStage(IPipelineStage<object> stage)
+    {
+        _stages.Add(stage);
+        return this;
+    }
+
+    public DataStreamProcessor AddStage<TPipelineStage>()
+        where TPipelineStage : IPipelineStage<object>, new()
+    {
+        _stages.Add(new TPipelineStage());
+        return this;
+    }
+
+    public void Start()
+    {
+        _processingTask = ProcessAsync(_cts.Token);
+    }
+
+    public async ValueTask EmitAsync(object item, CancellationToken ct = default)
+    {
+        await _inputChannel.Writer.WriteAsync(item, ct);
+    }
+
+    public IAsyncEnumerable<object> ReadAllAsync(CancellationToken ct = default) =>
+        _outputChannel.Reader.ReadAllAsync(ct);
+
+    private async Task ProcessAsync(CancellationToken ct)
+    {
+        await foreach (var item in _inputChannel.Reader.ReadAllAsync(ct))
+        {
+            var current = item;
+
+            foreach (var stage in _stages)
+            {
+                current = await stage.ProcessAsync(current, ct);
+            }
+
+            await _outputChannel.Writer.WriteAsync(current, ct);
+        }
+    }
+
+    public async Task StopAsync()
+    {
+        _inputChannel.Writer.TryComplete();
+        if (_processingTask is not null)
+            await _processingTask;
+        _outputChannel.Writer.TryComplete();
+    }
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 12：复杂异常和错误处理
+// Region 12: Complex exceptions and error handling
+// ====================================================================================================
+#region Exceptions
+
+namespace StArray.TestTools.Exceptions
+{
+
+[Serializable]
+public class DomainException : Exception
+{
+    public DomainException() { }
+    public DomainException(string message) : base(message) { }
+    public DomainException(string message, Exception inner) : base(message, inner) { }
+    public DomainException(string message, string errorCode) : base(message)
+    {
+        ErrorCode = errorCode;
+    }
+
+    public string? ErrorCode { get; }
+
+    protected DomainException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
+    {
+        ErrorCode = info.GetString(nameof(ErrorCode));
+    }
+
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        base.GetObjectData(info, context);
+        info.AddValue(nameof(ErrorCode), ErrorCode);
+    }
+}
+
+[Serializable]
+public sealed class ConcurrencyConflictException : DomainException
+{
+    public ConcurrencyConflictException() { }
+    public ConcurrencyConflictException(string message) : base(message, "CONCURRENCY_CONFLICT") { }
+    public ConcurrencyConflictException(string message, Exception inner) : base(message, inner) { }
+
+    private ConcurrencyConflictException(SerializationInfo info, StreamingContext context)
+        : base(info, context) { }
+}
+
+[Serializable]
+public sealed class ValidationException : DomainException
+{
+    public IReadOnlyDictionary<string, string[]> Errors { get; }
+
+    public ValidationException(string message, Dictionary<string, string[]> errors)
+        : base(message, "VALIDATION_ERROR")
+    {
+        Errors = errors ?? throw new ArgumentNullException(nameof(errors));
+    }
+
+    public ValidationException(string propertyName, string errorMessage)
+        : base($"Validation failed for {propertyName}", "VALIDATION_ERROR")
+    {
+        Errors = new Dictionary<string, string[]>
+        {
+            [propertyName] = [errorMessage],
+        };
+    }
+
+    private ValidationException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
+    {
+        Errors = (Dictionary<string, string[]>)info.GetValue(
+            nameof(Errors), typeof(Dictionary<string, string[]>))!;
+    }
+
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        base.GetObjectData(info, context);
+        info.AddValue(nameof(Errors), Errors);
+    }
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 13：复杂配置和构建器模式
+// Region 13: Complex configuration and builder pattern
+// ====================================================================================================
+#region Configuration
+
+namespace StArray.TestTools.Configuration
+{
+
+public sealed class AgentConfiguration
+{
+    public Uri? BaseUrl { get; init; }
+    public string ApiKey { get; init; } = string.Empty;
+    public string Model { get; init; } = "gpt-4o-mini";
+    public int MaxTokens { get; init; } = 4096;
+    public double Temperature { get; init; } = 0.7;
+    public double? TopP { get; init; }
+    public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds(30);
+    public RetryPolicy Retry { get; init; } = RetryPolicy.Default;
+    public LoggingConfig Logging { get; init; } = new();
+    public CacheConfig Cache { get; init; } = new();
+    public SecurityConfig Security { get; init; } = new();
+
+    public sealed record RetryPolicy
+    {
+        public static readonly RetryPolicy Default = new()
+        {
+            MaxRetries = 3,
+            BaseDelay = TimeSpan.FromMilliseconds(100),
+            MaxDelay = TimeSpan.FromSeconds(5),
+            BackoffMultiplier = 2.0,
+        };
+
+        public int MaxRetries { get; init; }
+        public TimeSpan BaseDelay { get; init; }
+        public TimeSpan MaxDelay { get; init; }
+        public double BackoffMultiplier { get; init; }
+        public Func<int, TimeSpan>? CustomBackoff { get; init; }
+
+        public TimeSpan GetDelay(int attempt) =>
+            CustomBackoff?.Invoke(attempt) ??
+            TimeSpan.FromMilliseconds(
+                Min(BaseDelay.TotalMilliseconds * Pow(BackoffMultiplier, attempt - 1),
+                    MaxDelay.TotalMilliseconds));
+    }
+
+    public sealed record LoggingConfig
+    {
+        public bool EnableConsole { get; init; } = true;
+        public bool EnableFile { get; init; } = true;
+        public string? FilePath { get; init; }
+        public LogLevel MinimumLevel { get; init; } = LogLevel.Information;
+        public bool IncludeTimestamps { get; init; } = true;
+        public bool IncludeCallerInfo { get; init; } = true;
+        public bool EnableDiagnosticSource { get; init; }
+    }
+
+    public sealed record CacheConfig
+    {
+        public bool Enabled { get; init; } = true;
+        public TimeSpan DefaultExpiry { get; init; } = TimeSpan.FromMinutes(5);
+        public int MaxSize { get; init; } = 10_000;
+        public CacheBackend Backend { get; init; } = CacheBackend.Memory;
+
+        public enum CacheBackend
+        {
+            Memory,
+            Redis,
+            Hybrid,
+        }
+    }
+
+    public sealed record SecurityConfig
+    {
+        public bool EnableEncryption { get; init; } = true;
+        public bool ValidateCertificates { get; init; } = true;
+        public string[] AllowedHosts { get; init; } = ["*"];
+        public int MaxRequestSize { get; init; } = 1024 * 1024 * 10;
+        public bool EnableAuditLogging { get; init; } = true;
+    }
+
+    public static AgentConfiguration Default { get; } = new();
+
+    public static AgentConfigurationBuilder CreateBuilder() => new();
+
+    public sealed class AgentConfigurationBuilder
+    {
+        private Uri? _baseUrl;
+        private string _apiKey = string.Empty;
+        private string _model = "gpt-4o-mini";
+        private int _maxTokens = 4096;
+        private double _temperature = 0.7;
+        private double? _topP;
+        private TimeSpan _timeout = TimeSpan.FromSeconds(30);
+        private RetryPolicy _retry = RetryPolicy.Default;
+        private LoggingConfig _logging = new();
+        private CacheConfig _cache = new();
+        private SecurityConfig _security = new();
+
+        public AgentConfigurationBuilder WithBaseUrl(Uri url) { _baseUrl = url; return this; }
+        public AgentConfigurationBuilder WithBaseUrl(string url) { _baseUrl = new Uri(url); return this; }
+        public AgentConfigurationBuilder WithApiKey(string key) { _apiKey = key; return this; }
+        public AgentConfigurationBuilder WithModel(string model) { _model = model; return this; }
+        public AgentConfigurationBuilder WithMaxTokens(int maxTokens) { _maxTokens = maxTokens; return this; }
+        public AgentConfigurationBuilder WithTemperature(double temp) { _temperature = temp; return this; }
+        public AgentConfigurationBuilder WithTopP(double topP) { _topP = topP; return this; }
+
+        public AgentConfigurationBuilder WithTimeout(TimeSpan timeout)
+        {
+            _timeout = timeout; return this;
+        }
+
+        public AgentConfigurationBuilder WithRetry(RetryPolicy retry)
+        {
+            _retry = retry; return this;
+        }
+
+        public AgentConfigurationBuilder ConfigureLogging(Func<LoggingConfig, LoggingConfig> configure)
+        {
+            _logging = configure(_logging); return this;
+        }
+
+        public AgentConfigurationBuilder ConfigureCache(Func<CacheConfig, CacheConfig> configure)
+        {
+            _cache = configure(_cache); return this;
+        }
+
+        public AgentConfigurationBuilder ConfigureSecurity(Func<SecurityConfig, SecurityConfig> configure)
+        {
+            _security = configure(_security); return this;
+        }
+
+        public AgentConfiguration Build() => new()
+        {
+            BaseUrl = _baseUrl,
+            ApiKey = _apiKey,
+            Model = _model,
+            MaxTokens = _maxTokens,
+            Temperature = _temperature,
+            TopP = _topP,
+            Timeout = _timeout,
+            Retry = _retry,
+            Logging = _logging,
+            Cache = _cache,
+            Security = _security,
+        };
+    }
+}
+
+public enum LogLevel
+{
+    Trace,
+    Debug,
+    Information,
+    Warning,
+    Error,
+    Critical,
+    None,
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 14：复杂多线程和并行处理
+// Region 14: Complex multithreading and parallel processing
+// ====================================================================================================
+#region Parallel Processing
+
+namespace StArray.TestTools.Concurrency
+{
+
+public sealed class ParallelTaskExecutor
+{
+    private const int DefaultMaxConcurrency = 64;
+    private readonly SemaphoreSlim _throttle;
+    private readonly ConcurrentBag<(Task Task, DateTime EnqueuedAt)> _runningTasks = [];
+    private readonly CancellationTokenSource _cts = new();
+
+    public ParallelTaskExecutor(int maxConcurrency = DefaultMaxConcurrency)
+    {
+        _throttle = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+    }
+
+    public async Task<TResult[]> ExecuteAsync<TResult>(
+        IEnumerable<Func<CancellationToken, ValueTask<TResult>>> taskFactories,
+        CancellationToken ct = default)
+    {
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ct);
+        var token = linkedCts.Token;
+
+        var tasks = taskFactories.Select(async factory =>
+        {
+            await _throttle.WaitAsync(token);
+            try
+            {
+                var task = factory(token);
+                _runningTasks.Add((task.AsTask(), DateTime.UtcNow));
+                return await task;
+            }
+            finally
+            {
+                _throttle.Release();
+            }
+        });
+
+        return await Task.WhenAll(tasks);
+    }
+
+    public async IAsyncEnumerable<TResult> ExecuteStreamingAsync<TResult>(
+        IAsyncEnumerable<Func<CancellationToken, ValueTask<TResult>>> taskFactories,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ct);
+        var token = linkedCts.Token;
+
+        var channel = Channel.CreateBounded<TResult>(new BoundedChannelOptions(100)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleWriter = false,
+            SingleReader = true,
+        });
+
+        var consumer = Task.Run(async () =>
+        {
+            await foreach (var factory in taskFactories.WithCancellation(token))
+            {
+                await _throttle.WaitAsync(token);
+                _ = PublishResultAsync(factory, channel.Writer, token);
+            }
+
+            await channel.Writer.WriteAsync(default!, token); // sentinel
+        }, token);
+
+        await foreach (var result in channel.Reader.ReadAllAsync(token))
+        {
+            if (result is null) yield break;
+            yield return result;
+        }
+    }
+
+    private async Task PublishResultAsync<TResult>(
+        Func<CancellationToken, ValueTask<TResult>> factory,
+        ChannelWriter<TResult> writer,
+        CancellationToken ct)
+    {
+        try
+        {
+            var result = await factory(ct);
+            await writer.WriteAsync(result, ct);
+        }
+        finally
+        {
+            _throttle.Release();
+        }
+    }
+
+    public int RunningTaskCount => _runningTasks.Count(t => !t.Task.IsCompleted);
+
+    public void CancelAll()
+    {
+        _cts.Cancel();
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+        _throttle.Dispose();
+    }
+}
+
+public sealed class MessageQueue<T>
+{
+    private readonly Channel<T> _channel;
+    private readonly List<Func<T, CancellationToken, ValueTask>> _handlers = [];
+    private Task? _consumerTask;
+    private readonly CancellationTokenSource _cts = new();
+
+    public MessageQueue(int capacity = 1000, BoundedChannelFullMode fullMode = BoundedChannelFullMode.Wait)
+    {
+        _channel = Channel.CreateBounded<T>(new BoundedChannelOptions(capacity)
+        {
+            FullMode = fullMode,
+            SingleWriter = false,
+            SingleReader = true,
+        });
+    }
+
+    public MessageQueue<T> Subscribe(Func<T, CancellationToken, ValueTask> handler)
+    {
+        _handlers.Add(handler);
+        return this;
+    }
+
+    public MessageQueue<T> Subscribe(Action<T> handler)
+    {
+        _handlers.Add((item, _) =>
+        {
+            handler(item);
+            return ValueTask.CompletedTask;
+        });
+        return this;
+    }
+
+    public void Start()
+    {
+        _consumerTask = ConsumeAsync(_cts.Token);
+    }
+
+    public async ValueTask PublishAsync(T message, CancellationToken ct = default)
+    {
+        await _channel.Writer.WriteAsync(message, ct);
+    }
+
+    public async ValueTask<bool> TryPublishAsync(T message, TimeSpan timeout, CancellationToken ct = default)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(timeout);
+        try
+        {
+            await _channel.Writer.WriteAsync(message, cts.Token);
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+    }
+
+    private async Task ConsumeAsync(CancellationToken ct)
+    {
+        await foreach (var message in _channel.Reader.ReadAllAsync(ct))
+        {
+            var tasks = _handlers.Select(handler =>
+            {
+                try
+                {
+                    return handler(message, ct).AsTask();
+                }
+                catch (Exception ex)
+                {
+                    return Task.FromException(ex);
+                }
+            });
+
+            await Task.WhenAll(tasks);
+        }
+    }
+
+    public async Task StopAsync()
+    {
+        _channel.Writer.TryComplete();
+        if (_consumerTask is not null)
+            await _consumerTask;
+    }
+
+    public int Count => _channel.Reader.Count;
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 15：复杂工厂和生成器
+// Region 15: Complex factory and generator
+// ====================================================================================================
+#region Factories
+
+namespace StArray.TestTools.Factories
+{
+
+using StArray.TestTools.Entities;
+
+public static class UserAccountFactory
+{
+    private static readonly string[] FirstNames =
+    [
+        "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace",
+        "Henry", "Ivy", "Jack", "Kate", "Leo", "Mia", "Noah",
+    ];
+
+    private static readonly string[] LastNames =
+    [
+        "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia",
+        "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez",
+    ];
+
+    private static readonly string[] Domains =
+    [
+        "example.com", "test.org", "demo.net", "sample.io", "local.dev",
+    ];
+
+    private static readonly ThreadLocal<Random> _random = new(() => new Random());
+
+    public static UserAccount CreateRandom()
+    {
+        var rng = _random.Value!;
+        var firstName = FirstNames[rng.Next(FirstNames.Length)];
+        var lastName = LastNames[rng.Next(LastNames.Length)];
+        var domain = Domains[rng.Next(Domains.Length)];
+
+        var username = $"{firstName.ToLowerInvariant()}.{lastName.ToLowerInvariant()}{rng.Next(1, 999)}";
+        var email = $"{username}@{domain}";
+
+        var account = new UserAccount(Guid.NewGuid(), username, email)
+        {
+            DisplayName = $"{firstName} {lastName}",
+            PhoneNumber = $"+1-555-{rng.Next(100, 999)}-{rng.Next(1000, 9999)}",
+        };
+
+        account.AssignRole(rng.Next(2) == 0 ? "User" : "Editor");
+
+        if (rng.Next(4) == 0)
+            account.AssignRole("Administrator");
+
+        return account;
+    }
+
+    public static IEnumerable<UserAccount> CreateMany(int count) =>
+        Enumerable.Range(0, count).Select(_ => CreateRandom());
+
+    public static UserAccount CreateHierarchy(int depth, int childrenPerLevel)
+    {
+        var root = CreateRandom();
+
+        void AddChildren(UserAccount parent, int remainingDepth)
+        {
+            if (remainingDepth <= 0) return;
+
+            for (var i = 0; i < childrenPerLevel; i++)
+            {
+                var child = CreateRandom();
+                parent.AddChild(child);
+                AddChildren(child, remainingDepth - 1);
+            }
+        }
+
+        AddChildren(root, depth);
+        return root;
+    }
+}
+
+public static class DataGenerator
+{
+    public static byte[] GenerateRandomBytes(int size)
+    {
+        var data = new byte[size];
+        RandomNumberGenerator.Fill(data);
+        return data;
+    }
+
+    public static string GenerateRandomString(int length, string? charset = null)
+    {
+        charset ??= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var data = new byte[length];
+        RandomNumberGenerator.Fill(data);
+        return new string(data.Select(b => charset[b % charset.Length]).ToArray());
+    }
+
+    public static IEnumerable<int> GenerateSequence(int count, int? seed = null)
+    {
+        var rng = seed.HasValue ? new Random(seed.Value) : Random.Shared;
+        for (var i = 0; i < count; i++)
+            yield return rng.Next();
+    }
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 16：复杂源生成器测试
+// Region 16: Complex source generator test structures
+// ====================================================================================================
+#region SourceGen
+
+namespace StArray.TestTools.SourceGen
+{
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+public sealed class AgentToolAttribute : Attribute
+{
+    public string? Name { get; init; }
+    public string? Description { get; init; }
+    public Type? ResourceType { get; init; }
+    public string? ResourceKey { get; init; }
+    public bool Enabled { get; init; } = true;
+    public SecurityLevel SecurityLevel { get; init; } = SecurityLevel.Normal;
+    public RateLimitPolicy RateLimit { get; init; } = RateLimitPolicy.Default;
+
+    public string GetDescription()
+    {
+        if (ResourceType is not null && ResourceKey is not null)
+        {
+            var prop = ResourceType.GetProperty(ResourceKey,
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            return prop?.GetValue(null)?.ToString() ?? Description ?? Name ?? string.Empty;
+        }
+
+        return Description ?? Name ?? string.Empty;
+    }
+}
+
+public enum SecurityLevel
+{
+    Public,
+    Normal,
+    Elevated,
+    AdminOnly,
+    System,
+}
+
+public enum RateLimitPolicy
+{
+    None,
+    Default,
+    Strict,
+    Critical,
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+public sealed class AgentFunctionAttribute : Attribute
+{
+    public string? Name { get; init; }
+    public string? Description { get; init; }
+    public bool Enabled { get; init; } = true;
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+public sealed class AgentParameterAttribute : Attribute
+{
+    public string? Name { get; init; }
+    public string? Description { get; init; }
+    public bool Required { get; init; } = true;
+    public object? DefaultValue { get; init; }
+    public string? ValidationPattern { get; init; }
+    public string? Type { get; init; }
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 17：复杂不可变集合和记录
+// Region 17: Complex immutable collections and records
+// ====================================================================================================
+#region Records
+
+namespace StArray.TestTools.Records
+{
+
+[Serializable]
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public readonly record struct FileType(string Extension, string MimeType, string Description)
+{
+    public static readonly FileType Unknown = new(".bin", "application/octet-stream", "Binary");
+    public static readonly FileType Text = new(".txt", "text/plain", "Text");
+    public static readonly FileType Json = new(".json", "application/json", "JSON");
+    public static readonly FileType Xml = new(".xml", "application/xml", "XML");
+    public static readonly FileType CSharp = new(".cs", "text/plain", "C# Source");
+    public static readonly FileType Markdown = new(".md", "text/markdown", "Markdown");
+    public static readonly FileType Yaml = new(".yaml", "application/x-yaml", "YAML");
+    public static readonly FileType Zip = new(".zip", "application/zip", "ZIP Archive");
+
+    public bool IsTextBased =>
+        this == Text || this == Json || this == Xml || this == CSharp || this == Markdown || this == Yaml;
+
+    public bool IsArchive => this == Zip;
+
+    public static FileType FromExtension(string extension)
+    {
+        var ext = extension?.ToLowerInvariant() ?? string.Empty;
+        return ext switch
+        {
+            ".txt" => Text,
+            ".json" => Json,
+            ".xml" => Xml,
+            ".cs" => CSharp,
+            ".md" => Markdown,
+            ".yaml" or ".yml" => Yaml,
+            ".zip" => Zip,
+            _ => Unknown,
+        };
+    }
+}
+
+public readonly record struct Range<T>(T Start, T End) where T : IComparable<T>, IAdditionOperators<T, T, T>
+{
+    public bool Contains(T value) =>
+        value.CompareTo(Start) >= 0 && value.CompareTo(End) <= 0;
+
+    public bool Overlaps(Range<T> other) =>
+        Contains(other.Start) || Contains(other.End) ||
+        other.Contains(Start) || other.Contains(End);
+
+    public static Range<T> FromLength(T start, T length) =>
+        new(start, start + length);
+
+    public override string ToString() => $"[{Start}, {End}]";
+}
+
+public readonly record struct Result<TValue, TError>
+{
+    private readonly TValue? _value;
+    private readonly TError? _error;
+    private readonly bool _isSuccess;
+
+    private Result(TValue value)
+    {
+        _value = value;
+        _error = default;
+        _isSuccess = true;
+    }
+
+    private Result(TError error)
+    {
+        _value = default;
+        _error = error;
+        _isSuccess = false;
+    }
+
+    public bool IsSuccess => _isSuccess;
+    public bool IsFailure => !_isSuccess;
+
+    public TValue Value => IsSuccess
+        ? _value!
+        : throw new InvalidOperationException("Cannot access value of a failed result");
+
+    public TError Error => !IsSuccess
+        ? _error!
+        : throw new InvalidOperationException("Cannot access error of a successful result");
+
+    public TValue ValueOrDefault => _value ?? default!;
+    public TError ErrorOrDefault => _error ?? default!;
+
+    public static Result<TValue, TError> Success(TValue value) => new(value);
+    public static Result<TValue, TError> Failure(TError error) => new(error);
+
+    public TOut Match<TOut>(Func<TValue, TOut> onSuccess, Func<TError, TOut> onFailure) =>
+        IsSuccess ? onSuccess(_value!) : onFailure(_error!);
+
+    public async ValueTask<TOut> MatchAsync<TOut>(
+        Func<TValue, ValueTask<TOut>> onSuccess,
+        Func<TError, ValueTask<TOut>> onFailure) =>
+        IsSuccess ? await onSuccess(_value!) : await onFailure(_error!);
+
+    public Result<TNewValue, TError> Map<TNewValue>(Func<TValue, TNewValue> mapper) =>
+        IsSuccess ? Result<TNewValue, TError>.Success(mapper(_value!)) : Result<TNewValue, TError>.Failure(_error!);
+
+    public Result<TValue, TNewError> MapError<TNewError>(Func<TError, TNewError> mapper) =>
+        IsSuccess ? Result<TValue, TNewError>.Success(_value!) : Result<TValue, TNewError>.Failure(mapper(_error!));
+
+    public Result<TNewValue, TError> Bind<TNewValue>(Func<TValue, Result<TNewValue, TError>> binder) =>
+        IsSuccess ? binder(_value!) : Result<TNewValue, TError>.Failure(_error!);
+
+    public static implicit operator Result<TValue, TError>(TValue value) => Success(value);
+    public static implicit operator Result<TValue, TError>(TError error) => Failure(error);
+
+    public void Deconstruct(out bool success, out TValue? value, out TError? error)
+    {
+        success = _isSuccess;
+        value = _value;
+        error = _error;
+    }
+
+    public override string ToString() =>
+        IsSuccess ? $"Success: {_value}" : $"Failure: {_error}";
+}
+
+public readonly record struct Maybe<T> where T : class?
+{
+    private readonly T? _value;
+    private readonly bool _hasValue;
+
+    private Maybe(T? value, bool hasValue)
+    {
+        _value = value;
+        _hasValue = hasValue;
+    }
+
+    public static Maybe<T> Some(T value) => new(value, true);
+    public static Maybe<T> None => new(default, false);
+
+    public bool HasValue => _hasValue;
+    public T Value => _hasValue ? _value! : throw new InvalidOperationException("Maybe has no value");
+    public T ValueOrDefault(T? defaultValue = default) => _hasValue ? _value! : defaultValue!;
+
+    public Maybe<TOut> Map<TOut>(Func<T, TOut> mapper) where TOut : class? =>
+        _hasValue ? Maybe<TOut>.Some(mapper(_value!)) : Maybe<TOut>.None;
+
+    public Maybe<TOut> Bind<TOut>(Func<T, Maybe<TOut>> binder) where TOut : class? =>
+        _hasValue ? binder(_value!) : Maybe<TOut>.None;
+
+    public T Reduce(T alternative) => _hasValue ? _value! : alternative;
+
+    public void Match(Action<T> onSome, Action onNone)
+    {
+        if (_hasValue) onSome(_value!);
+        else onNone();
+    }
+
+    public static implicit operator Maybe<T>(T? value) =>
+        value is not null ? Some(value) : None;
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 18：复杂测试辅助方法
+// Region 18: Complex test helper methods
+// ====================================================================================================
+#region TestHelpers
+
+#if DEBUG || ENABLE_DIAGNOSTIC_TRACE
+namespace StArray.TestTools.Diagnostics
+{
+
+using StArray.TestTools.Configuration;
+
+public sealed class DiagnosticScope : IDisposable
+{
+    private readonly string _name;
+    private readonly Stopwatch _sw;
+    private readonly Logger _logger;
+    private readonly Dictionary<string, object?> _context = [];
+
+    public DiagnosticScope(string name, Logger logger)
+    {
+        _name = name;
+        _logger = logger;
+        _sw = Stopwatch.StartNew();
+        _logger.Log(LogLevel.Debug, $"Entering scope: {name}");
+    }
+
+    public DiagnosticScope WithContext(string key, object? value)
+    {
+        _context[key] = value;
+        return this;
+    }
+
+    public void Dispose()
+    {
+        _sw.Stop();
+        var context = _context.Count > 0
+            ? $" [{string.Join(", ", _context.Select(kv => $"{kv.Key}={kv.Value}"))}]"
+            : string.Empty;
+        _logger.Log(LogLevel.Debug,
+            $"Exiting scope: {_name} (elapsed: {_sw.ElapsedMilliseconds}ms){context}");
+        GC.SuppressFinalize(this);
+    }
+}
+
+public sealed class Logger
+{
+    private readonly LogLevel _minimumLevel;
+    private readonly Action<LogEntry>? _writer;
+    private long _sequence;
+
+    public Logger(LogLevel minimumLevel = LogLevel.Information, Action<LogEntry>? writer = null)
+    {
+        _minimumLevel = minimumLevel;
+        _writer = writer;
+    }
+
+    public void Log(LogLevel level, string message, Exception? exception = null)
+    {
+        if (level < _minimumLevel) return;
+
+        var entry = new LogEntry
+        {
+            Sequence = Interlocked.Increment(ref _sequence),
+            Timestamp = DateTime.UtcNow,
+            Level = level,
+            Message = message,
+            Exception = exception,
+            ThreadId = Environment.CurrentManagedThreadId,
+        };
+
+        _writer?.Invoke(entry);
+
+#if ENABLE_VERBOSE_LOGGING
+        Debug.WriteLine(entry.ToString());
+#endif
+    }
+
+    public IDisposable BeginScope(string name) => new DiagnosticScope(name, this);
+
+    public readonly record struct LogEntry
+    {
+        public long Sequence { get; init; }
+        public DateTime Timestamp { get; init; }
+        public LogLevel Level { get; init; }
+        public string Message { get; init; }
+        public Exception? Exception { get; init; }
+        public int ThreadId { get; init; }
+
+        public override string ToString() =>
+            $"[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{Level,-11}] [{ThreadId,3}] {Message}" +
+            (Exception is not null ? $"\n{Exception}" : string.Empty);
+    }
+}
+
+public static class Logging
+{
+    public static Logger DefaultLogger { get; } = new(
+        LogLevel.Debug,
+        entry => Console.Out.WriteLine(entry.ToString()));
+}
+}
+
+#endif
+
+#endregion
+
+// ====================================================================================================
+// 区域 19：复杂代码契约和验证
+// Region 19: Complex code contracts and validation
+// ====================================================================================================
+#region Contracts
+
+namespace StArray.TestTools.Contracts
+{
+
+public static class Guard
+{
+    public static T ThrowIfNull<T>([NotNull] T? value, string? paramName = null)
+        where T : class
+    {
+        ArgumentNullException.ThrowIfNull(value, paramName);
+        return value;
+    }
+
+    public static string ThrowIfNullOrWhiteSpace([NotNull] string? value, string? paramName = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, paramName);
+        return value;
+    }
+
+    public static string ThrowIfNullOrEmpty([NotNull] string? value, string? paramName = null)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(value, paramName);
+        return value;
+    }
+
+    public static T ThrowIfOutOfRange<T>(T value, T min, T max, string? paramName = null)
+        where T : IComparable<T>
+    {
+        if (value.CompareTo(min) < 0 || value.CompareTo(max) > 0)
+            throw new ArgumentOutOfRangeException(paramName,
+                $"Value {value} is out of range [{min}, {max}]");
+        return value;
+    }
+
+    public static void ThrowIfNotValid(string? value, Func<string?, bool> validator, string message)
+    {
+        if (!validator(value))
+            throw new ArgumentException(message);
+    }
+
+    public static void ThrowIfDisposed(bool disposed, string? objectName = null)
+    {
+        if (disposed)
+            throw new ObjectDisposedException(objectName ?? "Object");
+    }
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 20：终极 - 复杂表达式和模式匹配演示
+// Region 20: Ultimate - Complex expression and pattern matching demo
+// ====================================================================================================
+#region Patterns
+
+namespace StArray.TestTools.Patterns
+{
+
+using StArray.TestTools.Contracts;
+using StArray.TestTools.Domain;
+using StArray.TestTools.Enums;
+using StArray.TestTools.Entities;
+using StArray.TestTools.Exceptions;
+
+public static class PatternMatcher
+{
+    public static string DescribeEntity<TKey>(IEntity<TKey> entity)
+        where TKey : IEquatable<TKey>, IComparable<TKey>, IParsable<TKey> =>
+        entity switch
+        {
+            UserAccount { Status: AccountStatus.Active, Roles: var r } u when r.Contains("Administrator") =>
+                $"Admin '{u.Username}' (active)",
+
+            UserAccount { Status: AccountStatus.Active } u =>
+                $"User '{u.Username}' (active)",
+
+            UserAccount { Status: AccountStatus.Deactivated } u =>
+                $"User '{u.Username}' (deactivated)",
+
+            UserAccount { Status: AccountStatus.Suspended, LockedUntil: var until } u
+                when until > DateTime.UtcNow =>
+                $"User '{u.Username}' (suspended until {until:g})",
+
+            { Id: var id } => $"Entity [{id}]",
+
+            _ => $"Unknown entity of type {entity.GetType().Name}",
+        };
+
+    public static (string Category, string Action) CategorizeError(Exception ex) =>
+        ex switch
+        {
+            ValidationException { Errors.Count: > 0 } ve =>
+                ("Validation", $"Validation failed with {ve.Errors.Count} errors"),
+
+            ConcurrencyConflictException =>
+                ("Concurrency", "Concurrency conflict detected"),
+
+            DomainException { ErrorCode: not null } de =>
+                ("Domain", $"Domain error [{de.ErrorCode}]: {de.Message}"),
+
+            TimeoutException =>
+                ("System", "Operation timed out"),
+
+            UnauthorizedAccessException =>
+                ("Security", "Access denied"),
+
+            OperationCanceledException =>
+                ("System", "Operation was cancelled"),
+
+            HttpRequestException { StatusCode: HttpStatusCode status } hre =>
+                ("Network", $"HTTP {status}: {hre.Message}"),
+
+            AggregateException ae =>
+                CategorizeError(ae.InnerExceptions.Count == 1
+                    ? ae.InnerExceptions[0]
+                    : ae.InnerExceptions[0]),
+
+            _ => ("Unknown", $"Unhandled exception: {ex.GetType().Name}"),
+        };
+
+    public static string FormatMoney(Money money) => money switch
+    {
+        { Amount: < 0 } m => $"-{Math.Abs(m.Amount):N2} {m.Currency}",
+        { Amount: 0 } => $"0.00 {money.Currency}",
+        { Amount: > 1_000_000 } m => $"{m.Amount / 1_000_000:N2}M {m.Currency}",
+        { Amount: > 1_000 } m => $"{m.Amount / 1_000:N2}K {m.Currency}",
+        _ => $"{money}",
+    };
+
+    public static ProcessingFlags ApplyConditionalFlags(bool condition, ProcessingFlags trueFlags, ProcessingFlags falseFlags) =>
+        condition ? trueFlags : falseFlags;
+}
+
+public static class ExpressionBuilder
+{
+    public static Func<T, bool> And<T>(this Func<T, bool> left, Func<T, bool> right) =>
+        x => left(x) && right(x);
+
+    public static Func<T, bool> Or<T>(this Func<T, bool> left, Func<T, bool> right) =>
+        x => left(x) || right(x);
+
+    public static Func<T, bool> Not<T>(this Func<T, bool> predicate) =>
+        x => !predicate(x);
+
+    public static Func<T, bool> Chain<T>(params Func<T, bool>[] predicates) =>
+        x => predicates.All(p => p(x));
+
+    public static Func<T, TResult> Compose<T, T1, TResult>(
+        Func<T, T1> first,
+        Func<T1, TResult> second) =>
+        x => second(first(x));
+}
+
+}
+#endregion
+
+// ====================================================================================================
+// 区域 21：复杂顶级语句模拟
+// Region 21: Complex top-level statement simulation
+// ====================================================================================================
+#if DEBUG
+namespace StArray.TestTools.TopLevel
+{
+
+using StArray.TestTools.Configuration;
+using StArray.TestTools.Data;
+using StArray.TestTools.Domain;
+using StArray.TestTools.Entities;
+using StArray.TestTools.Factories;
+
+public static class Program
+{
+    public static async Task<int> Main(string[] args)
+    {
+        var config = AgentConfiguration.CreateBuilder()
+            .WithApiKey(Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "")
+            .WithModel("gpt-4o-mini")
+            .WithMaxTokens(4096)
+            .WithTemperature(0.7)
+            .WithTimeout(TimeSpan.FromSeconds(30))
+            .ConfigureLogging(l => l with { MinimumLevel = LogLevel.Debug })
+            .ConfigureCache(c => c with { Enabled = true, DefaultExpiry = TimeSpan.FromMinutes(10) })
+            .Build();
+
+        Console.WriteLine($"Configuration loaded: {config.Model}, {config.MaxTokens} tokens");
+
+        var user = UserAccountFactory.CreateRandom();
+        Console.WriteLine($"Created user: {user.Username} ({user.Email})");
+
+        var repo = new InMemoryRepository<UserAccount, Guid>();
+        await repo.AddAsync(user);
+
+        var fetched = await repo.GetByIdAsync(user.Id);
+        Console.WriteLine($"Fetched from repo: {fetched?.Username}");
+
+        var money1 = new Money(1234.56m, CurrencyCode.USD);
+        var money2 = new Money(789.00m, CurrencyCode.USD);
+        var sum = money1 + money2;
+        Console.WriteLine($"Money: {money1} + {money2} = {sum}");
+
+        var hierarchy = UserAccountFactory.CreateHierarchy(3, 2);
+        Console.WriteLine($"Hierarchy root: {hierarchy.Username}, descendants: {hierarchy.Descendants.Count()}");
+
+        return 0;
+    }
+}
+}
+#endif

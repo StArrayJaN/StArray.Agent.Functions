@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- SAF0001: Missing [ToolParameter] on [AgentTool] method -->
+  <data name="SAF0001_Title" xml:space="preserve">
+    <value>Agent 工具方法参数缺少 [ToolParameter] 特性</value>
+  </data>
+  <data name="SAF0001_MessageFormat" xml:space="preserve">
+    <value>参数 '{0}'（方法 '{1}'）缺少 [ToolParameter] 特性，Agent 无法获取参数描述</value>
+  </data>
+  <data name="SAF0001_Description" xml:space="preserve">
+    <value>所有标记 [AgentTool] 的方法参数都应添加 [ToolParameter] 特性，以便 Agent 知晓每个参数的用途。</value>
+  </data>
+
+  <!-- SAF0002: Orphan [ToolParameter] on non-[AgentTool] method -->
+  <data name="SAF0002_Title" xml:space="preserve">
+    <value>非 Agent 方法的参数不应使用 [ToolParameter] 特性</value>
+  </data>
+  <data name="SAF0002_MessageFormat" xml:space="preserve">
+    <value>参数 '{0}'（方法 '{1}'）有 [ToolParameter] 特性，但该方法未标记 [AgentTool]，该特性无效</value>
+  </data>
+  <data name="SAF0002_Description" xml:space="preserve">
+    <value>[ToolParameter] 仅在标记 [AgentTool] 的方法上有效，非 Agent 方法请移除该特性。</value>
+  </data>
+
+  <!-- CodeFix titles -->
+  <data name="CodeFix_AddToolParameter" xml:space="preserve">
+    <value>添加 [ToolParameter] 特性</value>
+  </data>
+  <data name="CodeFix_RemoveToolParameter" xml:space="preserve">
+    <value>移除 [ToolParameter] 特性</value>
+  </data>
+  <data name="CodeFix_AddAgentTool" xml:space="preserve">
+    <value>为方法添加 [AgentTool] 特性</value>
+  </data>
+</root>

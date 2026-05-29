@@ -1,0 +1,6 @@
+# ---- 环境变量配置（复制本文件为 api.sh 并填入你的真实值）----
+# Environment variable configuration (copy this file to api.sh and fill in your real values)
+OPENAI_API_URL="https://api.deepseek.com"
+OPENAI_API_KEY="<your-api-key>"
+OPENAI_CHAT_MODEL="deepseek-v4-pro"
+export OPENAI_API_URL OPENAI_API_KEY OPENAI_CHAT_MODEL
