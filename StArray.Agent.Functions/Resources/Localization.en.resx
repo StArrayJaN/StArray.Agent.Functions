@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
     <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
         <xsd:element name="root" msdata:IsDataSet="true">
@@ -16,59 +16,17 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
-    <data name="Tool_Math_Add" xml:space="preserve">
-        <value>Add two integers</value>
+   
+    <data name="Tool_File_ChangeWorkingDirectory" xml:space="preserve">
+        <value>Change the current working directory</value>
     </data>
-    <data name="Tool_Math_Subtract" xml:space="preserve">
-        <value>Subtract the second integer from the first</value>
+
+    <!-- FileTools shared -->
+    <data name="Tool_File_FilePath" xml:space="preserve">
+        <value>The file path</value>
     </data>
-    <data name="Tool_Math_Multiply" xml:space="preserve">
-        <value>Multiply two integers</value>
-    </data>
-    <data name="Tool_Math_Divide" xml:space="preserve">
-        <value>Divide the first number by the second</value>
-    </data>
-    <data name="Tool_Text_Length" xml:space="preserve">
-        <value>Get the length of a text string</value>
-    </data>
-    <data name="Tool_Text_ToUpper" xml:space="preserve">
-        <value>Convert text to uppercase</value>
-    </data>
-    <data name="Tool_Text_ToLower" xml:space="preserve">
-        <value>Convert text to lowercase</value>
-    </data>
-    <data name="Tool_Text_Concat" xml:space="preserve">
-        <value>Concatenate two text strings</value>
-    </data>
-    <data name="Tool_Code_ValidateJson" xml:space="preserve">
-        <value>Validate a JSON string</value>
-    </data>
-    <data name="Tool_Code_CountLines" xml:space="preserve">
-        <value>Count the number of lines in source code</value>
-    </data>
-    <data name="Tool_File_Exists" xml:space="preserve">
-        <value>Check if a file exists at the given path</value>
-    </data>
-    <data name="Tool_File_ReadAllText" xml:space="preserve">
-        <value>Read all text from a file</value>
-    </data>
-    <data name="Tool_File_WriteAllText" xml:space="preserve">
-        <value>Write text content to a file</value>
-    </data>
-    <data name="Tool_Time_Now" xml:space="preserve">
-        <value>Get the current local time</value>
-    </data>
-    <data name="Tool_Time_UtcNow" xml:space="preserve">
-        <value>Get the current UTC time</value>
-    </data>
-    <data name="Tool_Time_AddDays" xml:space="preserve">
-        <value>Add a number of days to a date</value>
-    </data>
-    <data name="Tool_FileTools_ReadFileContent" xml:space="preserve">
-        <value>Read a range of lines from a file</value>
-    </data>
-    <data name="Tool_File_ReplaceString" xml:space="preserve">
-        <value>Replace a string in a file</value>
+    <data name="Tool_File_DirectoryPath" xml:space="preserve">
+        <value>The directory path</value>
     </data>
 
     <!-- MathTools parameters -->
@@ -89,6 +47,9 @@
     </data>
     <data name="Tool_Math_Multiply_b" xml:space="preserve">
         <value>The second integer</value>
+    </data>
+    <data name="Tool_Math_Divide" xml:space="preserve">
+        <value>Divides the first integer by the second integer</value>
     </data>
     <data name="Tool_Math_Divide_a" xml:space="preserve">
         <value>The dividend</value>
@@ -130,9 +91,35 @@
         <value>The number of days to add</value>
     </data>
 
+    <!-- ShellTools parameters -->
+    <data name="Tool_Shell_Execute_command" xml:space="preserve">
+        <value>The command to execute</value>
+    </data>
+    <data name="Tool_Shell_Execute_shell" xml:space="preserve">
+        <value>Shell type (cmd, bash, powershell, sh)</value>
+    </data>
+    <data name="Tool_Shell_Execute_workingDir" xml:space="preserve">
+        <value>Working directory (optional)</value>
+    </data>
+    <data name="Tool_Shell_Execute_timeout" xml:space="preserve">
+        <value>Timeout in milliseconds</value>
+    </data>
+    <data name="Tool_Shell_GetEnv_name" xml:space="preserve">
+        <value>Environment variable name</value>
+    </data>
+    <data name="Tool_Shell_SetEnv_name" xml:space="preserve">
+        <value>Environment variable name</value>
+    </data>
+    <data name="Tool_Shell_SetEnv_value" xml:space="preserve">
+        <value>Environment variable value</value>
+    </data>
+
     <!-- FileTools parameters -->
     <data name="Tool_File_Exists_path" xml:space="preserve">
         <value>The file path</value>
+    </data>
+    <data name="Tool_File_ListFiles_recursive" xml:space="preserve">
+        <value>Whether to search subdirectories recursively</value>
     </data>
     <data name="Tool_File_ReadAllText_path" xml:space="preserve">
         <value>The file path</value>
@@ -143,8 +130,6 @@
     <data name="Tool_File_WriteAllText_content" xml:space="preserve">
         <value>The content to write</value>
     </data>
-
-    <!-- ReadFileContent parameters -->
     <data name="Tool_FileTools_ReadFileContent_path" xml:space="preserve">
         <value>The file path</value>
     </data>
@@ -154,18 +139,25 @@
     <data name="Tool_FileTools_ReadFileContent_rangeLines" xml:space="preserve">
         <value>The number of lines to read</value>
     </data>
-
-    <!-- ReplaceStringInFile parameters -->
-    <data name="Tool_File_ReplaceString_path" xml:space="preserve">
-        <value>The file path</value>
-    </data>
-    <data name="Tool_File_ReplaceString_oldValue" xml:space="preserve">
+    <data name="Tool_File_ReplaceStringInFile_oldValue" xml:space="preserve">
         <value>The old string to replace</value>
     </data>
-    <data name="Tool_File_ReplaceString_newValue" xml:space="preserve">
+    <data name="Tool_File_ReplaceStringInFile_newValue" xml:space="preserve">
         <value>The new string to replace with</value>
     </data>
-    <data name="Tool_File_ReplaceString_isRegex" xml:space="preserve">
+    <data name="Tool_File_ReplaceStringInFile_isRegex" xml:space="preserve">
+        <value>Whether to use regular expression</value>
+    </data>
+    <data name="Tool_File_Delete_path" xml:space="preserve">
+        <value>The path of the file to delete</value>
+    </data>
+    <data name="Tool_File_SearchContentInFiles_paths" xml:space="preserve">
+        <value>The file paths to search</value>
+    </data>
+    <data name="Tool_File_SearchContentInFiles_content" xml:space="preserve">
+        <value>The content to search for</value>
+    </data>
+    <data name="Tool_File_SearchContentInFiles_isRegex" xml:space="preserve">
         <value>Whether to use regular expression</value>
     </data>
 </root>

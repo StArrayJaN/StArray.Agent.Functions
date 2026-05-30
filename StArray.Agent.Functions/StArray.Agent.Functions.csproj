@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -41,6 +41,13 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Resources\Localization.resx</DependentUpon>
       </Compile>
+    </ItemGroup>
+
+    <!-- 将 .resx 注册为 AdditionalFile，供诊断分析器 SAF0003 扫描本地化键 -->
+    <!-- Register .resx as AdditionalFile so the analyzer SAF0003 can scan localization keys -->
+    <ItemGroup>
+        <AdditionalFiles Include="Resources\Localization.resx" />
+        <AdditionalFiles Include="Resources\Localization.en.resx" />
     </ItemGroup>
 
 </Project>

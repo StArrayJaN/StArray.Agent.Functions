@@ -35,6 +35,17 @@
     <value>[ToolParameter] 仅在标记 [AgentTool] 的方法上有效，非 Agent 方法请移除该特性。</value>
   </data>
 
+  <!-- SAF0003: Missing localization key for [AgentTool] or [ToolParameter] -->
+  <data name="SAF0003_Title" xml:space="preserve">
+    <value>本地化键不存在于资源文件</value>
+  </data>
+  <data name="SAF0003_MessageFormat" xml:space="preserve">
+    <value>{2} '{0}' 的本地化键 '{1}' 在 '{3}' 中不存在（isLocalize=true）</value>
+  </data>
+  <data name="SAF0003_Description" xml:space="preserve">
+    <value>当 [AgentTool]/[ToolParameter] 指定 isLocalize=true 时，其本地化键必须存在于 _resourceType 指向的资源文件中。</value>
+  </data>
+
   <!-- CodeFix titles -->
   <data name="CodeFix_AddToolParameter" xml:space="preserve">
     <value>添加 [ToolParameter] 特性</value>

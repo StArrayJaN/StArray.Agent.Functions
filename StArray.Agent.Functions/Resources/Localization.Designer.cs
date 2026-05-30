@@ -60,110 +60,20 @@ namespace StArray.Agent.Functions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 第一个整数.
+        ///   Looks up a localized string similar to 统计源代码行数.
         /// </summary>
-        internal static string Param_A {
+        internal static string Tool_Code_CountLines {
             get {
-                return ResourceManager.GetString("Param_A", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 第二个整数.
-        /// </summary>
-        internal static string Param_B {
-            get {
-                return ResourceManager.GetString("Param_B", resourceCulture);
+                return ResourceManager.GetString("Tool_Code_CountLines", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to 待分析的源代码.
         /// </summary>
-        internal static string Param_Code {
+        internal static string Tool_Code_CountLines_code {
             get {
-                return ResourceManager.GetString("Param_Code", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 要写入的内容.
-        /// </summary>
-        internal static string Param_Content {
-            get {
-                return ResourceManager.GetString("Param_Content", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 日期字符串.
-        /// </summary>
-        internal static string Param_Date {
-            get {
-                return ResourceManager.GetString("Param_Date", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 要增加的天数.
-        /// </summary>
-        internal static string Param_Days {
-            get {
-                return ResourceManager.GetString("Param_Days", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 待验证的 JSON 字符串.
-        /// </summary>
-        internal static string Param_Json {
-            get {
-                return ResourceManager.GetString("Param_Json", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 文件路径.
-        /// </summary>
-        internal static string Param_Path {
-            get {
-                return ResourceManager.GetString("Param_Path", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 文本输入.
-        /// </summary>
-        internal static string Param_Text {
-            get {
-                return ResourceManager.GetString("Param_Text", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 第一个文本.
-        /// </summary>
-        internal static string Param_Text1 {
-            get {
-                return ResourceManager.GetString("Param_Text1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 第二个文本.
-        /// </summary>
-        internal static string Param_Text2 {
-            get {
-                return ResourceManager.GetString("Param_Text2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 统计源代码行数.
-        /// </summary>
-        internal static string Tool_Code_CountLines {
-            get {
-                return ResourceManager.GetString("Tool_Code_CountLines", resourceCulture);
+                return ResourceManager.GetString("Tool_Code_CountLines_code", resourceCulture);
             }
         }
         
@@ -177,11 +87,101 @@ namespace StArray.Agent.Functions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 待验证的 JSON 字符串.
+        /// </summary>
+        internal static string Tool_Code_ValidateJson_json {
+            get {
+                return ResourceManager.GetString("Tool_Code_ValidateJson_json", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 更改当前工作目录.
+        /// </summary>
+        internal static string Tool_File_ChangeWorkingDirectory {
+            get {
+                return ResourceManager.GetString("Tool_File_ChangeWorkingDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 删除指定文件.
+        /// </summary>
+        internal static string Tool_File_Delete {
+            get {
+                return ResourceManager.GetString("Tool_File_Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 要删除的文件路径.
+        /// </summary>
+        internal static string Tool_File_Delete_path {
+            get {
+                return ResourceManager.GetString("Tool_File_Delete_path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 目录路径.
+        /// </summary>
+        internal static string Tool_File_DirectoryPath {
+            get {
+                return ResourceManager.GetString("Tool_File_DirectoryPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 检查指定路径的文件是否存在.
         /// </summary>
         internal static string Tool_File_Exists {
             get {
                 return ResourceManager.GetString("Tool_File_Exists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 文件路径.
+        /// </summary>
+        internal static string Tool_File_Exists_path {
+            get {
+                return ResourceManager.GetString("Tool_File_Exists_path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 文件路径.
+        /// </summary>
+        internal static string Tool_File_FilePath {
+            get {
+                return ResourceManager.GetString("Tool_File_FilePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 获取当前工作目录路径.
+        /// </summary>
+        internal static string Tool_File_GetCurrentDirectory {
+            get {
+                return ResourceManager.GetString("Tool_File_GetCurrentDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 列出目录中的文件.
+        /// </summary>
+        internal static string Tool_File_ListFiles {
+            get {
+                return ResourceManager.GetString("Tool_File_ListFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 是否递归搜索子目录.
+        /// </summary>
+        internal static string Tool_File_ListFiles_recursive {
+            get {
+                return ResourceManager.GetString("Tool_File_ListFiles_recursive", resourceCulture);
             }
         }
         
@@ -195,11 +195,146 @@ namespace StArray.Agent.Functions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 文件路径.
+        /// </summary>
+        internal static string Tool_File_ReadAllText_path {
+            get {
+                return ResourceManager.GetString("Tool_File_ReadAllText_path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 替换文件中的字符串.
+        /// </summary>
+        internal static string Tool_File_ReplaceStringInFile {
+            get {
+                return ResourceManager.GetString("Tool_File_ReplaceStringInFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 是否使用正则表达式.
+        /// </summary>
+        internal static string Tool_File_ReplaceStringInFile_isRegex {
+            get {
+                return ResourceManager.GetString("Tool_File_ReplaceStringInFile_isRegex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 替换后的新字符串.
+        /// </summary>
+        internal static string Tool_File_ReplaceStringInFile_newValue {
+            get {
+                return ResourceManager.GetString("Tool_File_ReplaceStringInFile_newValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 要替换的旧字符串.
+        /// </summary>
+        internal static string Tool_File_ReplaceStringInFile_oldValue {
+            get {
+                return ResourceManager.GetString("Tool_File_ReplaceStringInFile_oldValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 在文件中搜索内容.
+        /// </summary>
+        internal static string Tool_File_SearchContentInFiles {
+            get {
+                return ResourceManager.GetString("Tool_File_SearchContentInFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 要搜索的内容.
+        /// </summary>
+        internal static string Tool_File_SearchContentInFiles_content {
+            get {
+                return ResourceManager.GetString("Tool_File_SearchContentInFiles_content", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 是否使用正则表达式.
+        /// </summary>
+        internal static string Tool_File_SearchContentInFiles_isRegex {
+            get {
+                return ResourceManager.GetString("Tool_File_SearchContentInFiles_isRegex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 要搜索的文件路径数组.
+        /// </summary>
+        internal static string Tool_File_SearchContentInFiles_paths {
+            get {
+                return ResourceManager.GetString("Tool_File_SearchContentInFiles_paths", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 将文本内容写入文件.
         /// </summary>
         internal static string Tool_File_WriteAllText {
             get {
                 return ResourceManager.GetString("Tool_File_WriteAllText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 要写入的内容.
+        /// </summary>
+        internal static string Tool_File_WriteAllText_content {
+            get {
+                return ResourceManager.GetString("Tool_File_WriteAllText_content", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 文件路径.
+        /// </summary>
+        internal static string Tool_File_WriteAllText_path {
+            get {
+                return ResourceManager.GetString("Tool_File_WriteAllText_path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 读取文件指定行范围的内容.
+        /// </summary>
+        internal static string Tool_FileTools_ReadFileContent {
+            get {
+                return ResourceManager.GetString("Tool_FileTools_ReadFileContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 文件路径.
+        /// </summary>
+        internal static string Tool_FileTools_ReadFileContent_path {
+            get {
+                return ResourceManager.GetString("Tool_FileTools_ReadFileContent_path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 读取行数.
+        /// </summary>
+        internal static string Tool_FileTools_ReadFileContent_rangeLines {
+            get {
+                return ResourceManager.GetString("Tool_FileTools_ReadFileContent_rangeLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 起始行号.
+        /// </summary>
+        internal static string Tool_FileTools_ReadFileContent_startLine {
+            get {
+                return ResourceManager.GetString("Tool_FileTools_ReadFileContent_startLine", resourceCulture);
             }
         }
         
@@ -213,11 +348,47 @@ namespace StArray.Agent.Functions.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 第一个数除以第二个数.
+        ///   Looks up a localized string similar to 第一个整数.
+        /// </summary>
+        internal static string Tool_Math_Add_a {
+            get {
+                return ResourceManager.GetString("Tool_Math_Add_a", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 第二个整数.
+        /// </summary>
+        internal static string Tool_Math_Add_b {
+            get {
+                return ResourceManager.GetString("Tool_Math_Add_b", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 第一个整数除以第二个整数.
         /// </summary>
         internal static string Tool_Math_Divide {
             get {
                 return ResourceManager.GetString("Tool_Math_Divide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 被除数.
+        /// </summary>
+        internal static string Tool_Math_Divide_a {
+            get {
+                return ResourceManager.GetString("Tool_Math_Divide_a", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 除数.
+        /// </summary>
+        internal static string Tool_Math_Divide_b {
+            get {
+                return ResourceManager.GetString("Tool_Math_Divide_b", resourceCulture);
             }
         }
         
@@ -231,11 +402,137 @@ namespace StArray.Agent.Functions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 第一个整数.
+        /// </summary>
+        internal static string Tool_Math_Multiply_a {
+            get {
+                return ResourceManager.GetString("Tool_Math_Multiply_a", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 第二个整数.
+        /// </summary>
+        internal static string Tool_Math_Multiply_b {
+            get {
+                return ResourceManager.GetString("Tool_Math_Multiply_b", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 第一个整数减去第二个整数.
         /// </summary>
         internal static string Tool_Math_Subtract {
             get {
                 return ResourceManager.GetString("Tool_Math_Subtract", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 第一个整数（被减数）.
+        /// </summary>
+        internal static string Tool_Math_Subtract_a {
+            get {
+                return ResourceManager.GetString("Tool_Math_Subtract_a", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 第二个整数（减数）.
+        /// </summary>
+        internal static string Tool_Math_Subtract_b {
+            get {
+                return ResourceManager.GetString("Tool_Math_Subtract_b", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 执行 Shell 命令.
+        /// </summary>
+        internal static string Tool_Shell_Execute {
+            get {
+                return ResourceManager.GetString("Tool_Shell_Execute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 要执行的命令.
+        /// </summary>
+        internal static string Tool_Shell_Execute_command {
+            get {
+                return ResourceManager.GetString("Tool_Shell_Execute_command", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shell 类型（cmd、bash、powershell、sh）.
+        /// </summary>
+        internal static string Tool_Shell_Execute_shell {
+            get {
+                return ResourceManager.GetString("Tool_Shell_Execute_shell", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 超时时间（毫秒）.
+        /// </summary>
+        internal static string Tool_Shell_Execute_timeout {
+            get {
+                return ResourceManager.GetString("Tool_Shell_Execute_timeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 工作目录（可选）.
+        /// </summary>
+        internal static string Tool_Shell_Execute_workingDir {
+            get {
+                return ResourceManager.GetString("Tool_Shell_Execute_workingDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 获取环境变量值.
+        /// </summary>
+        internal static string Tool_Shell_GetEnv {
+            get {
+                return ResourceManager.GetString("Tool_Shell_GetEnv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 环境变量名.
+        /// </summary>
+        internal static string Tool_Shell_GetEnv_name {
+            get {
+                return ResourceManager.GetString("Tool_Shell_GetEnv_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 设置环境变量.
+        /// </summary>
+        internal static string Tool_Shell_SetEnv {
+            get {
+                return ResourceManager.GetString("Tool_Shell_SetEnv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 环境变量名.
+        /// </summary>
+        internal static string Tool_Shell_SetEnv_name {
+            get {
+                return ResourceManager.GetString("Tool_Shell_SetEnv_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 环境变量值.
+        /// </summary>
+        internal static string Tool_Shell_SetEnv_value {
+            get {
+                return ResourceManager.GetString("Tool_Shell_SetEnv_value", resourceCulture);
             }
         }
         
@@ -249,11 +546,38 @@ namespace StArray.Agent.Functions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 第一个文本.
+        /// </summary>
+        internal static string Tool_Text_Concat_first {
+            get {
+                return ResourceManager.GetString("Tool_Text_Concat_first", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 第二个文本.
+        /// </summary>
+        internal static string Tool_Text_Concat_second {
+            get {
+                return ResourceManager.GetString("Tool_Text_Concat_second", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 获取文本字符串的长度.
         /// </summary>
         internal static string Tool_Text_Length {
             get {
                 return ResourceManager.GetString("Tool_Text_Length", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 文本输入.
+        /// </summary>
+        internal static string Tool_Text_Length_text {
+            get {
+                return ResourceManager.GetString("Tool_Text_Length_text", resourceCulture);
             }
         }
         
@@ -267,6 +591,15 @@ namespace StArray.Agent.Functions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 文本输入.
+        /// </summary>
+        internal static string Tool_Text_ToLower_text {
+            get {
+                return ResourceManager.GetString("Tool_Text_ToLower_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 将文本转换为大写.
         /// </summary>
         internal static string Tool_Text_ToUpper {
@@ -276,11 +609,38 @@ namespace StArray.Agent.Functions.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 文本输入.
+        /// </summary>
+        internal static string Tool_Text_ToUpper_text {
+            get {
+                return ResourceManager.GetString("Tool_Text_ToUpper_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 给日期增加指定天数.
         /// </summary>
         internal static string Tool_Time_AddDays {
             get {
                 return ResourceManager.GetString("Tool_Time_AddDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 日期字符串.
+        /// </summary>
+        internal static string Tool_Time_AddDays_dateString {
+            get {
+                return ResourceManager.GetString("Tool_Time_AddDays_dateString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 要增加的天数.
+        /// </summary>
+        internal static string Tool_Time_AddDays_days {
+            get {
+                return ResourceManager.GetString("Tool_Time_AddDays_days", resourceCulture);
             }
         }
         

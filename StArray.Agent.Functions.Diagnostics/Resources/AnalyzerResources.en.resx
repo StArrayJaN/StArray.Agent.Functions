@@ -35,7 +35,16 @@
     <value>[ToolParameter] is only effective on methods marked [AgentTool]; remove it from non-Agent methods.</value>
   </data>
 
-  <!-- CodeFix titles -->
+  <!-- SAF0003: Missing localization key for [AgentTool] or [ToolParameter] -->
+  <data name="SAF0003_Title" xml:space="preserve">
+    <value>Localization key not found in resource file</value>
+  </data>
+  <data name="SAF0003_MessageFormat" xml:space="preserve">
+    <value>{2} '{0}' localization key '{1}' not found in Localization.resx (isLocalize=true)</value>
+  </data>
+  <data name="SAF0003_Description" xml:space="preserve">
+    <value>When [AgentTool]/[ToolParameter] specifies isLocalize=true, the localization key must exist in the project's Localization.resx file.</value>
+  </data>
   <data name="CodeFix_AddToolParameter" xml:space="preserve">
     <value>Add [ToolParameter] attribute</value>
   </data>

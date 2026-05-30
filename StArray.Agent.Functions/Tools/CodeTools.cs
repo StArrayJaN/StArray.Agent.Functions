@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.AI;
 using StArray.Agent.Functions.Annotations;
 using StArray.Agent.Functions.Core;
@@ -34,4 +35,5 @@ public partial class CodeTools : ITools
         return ToolResult<int>.Success(
             code.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries).Length);
     }
+    
 }

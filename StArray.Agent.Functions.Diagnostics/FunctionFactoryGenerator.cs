@@ -53,7 +53,7 @@ public class FunctionFactoryGenerator : IIncrementalGenerator
 
                 // 收集带 [AgentTool] 特性的 public 实例方法
                 // Collect public instance methods with [AgentTool] attribute
-                var agentMethods = new List<string>();
+                var agentMethods = new List<MethodInfo>();
                 foreach (var member in classSymbol.GetMembers())
                 {
                     if (member is IMethodSymbol method
@@ -67,7 +67,9 @@ public class FunctionFactoryGenerator : IIncrementalGenerator
                             if (attr.AttributeClass?.Name is AgentToolAttributeName or AgentToolAttributeShortName
                                 && attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "StArray.Agent.Functions.Annotations")
                             {
-                                agentMethods.Add(method.Name);
+                                var needAgree = attr.NamedArguments.Any(
+                                    kv => kv.Key == "NeedAgree" && kv.Value.Value is true);
+                                agentMethods.Add(new MethodInfo(method.Name, needAgree));
                                 break;
                             }
                         }
@@ -138,8 +140,13 @@ public class FunctionFactoryGenerator : IIncrementalGenerator
 
         for (var i = 0; i < info.AgentMethods.Count; i++)
         {
+            var m = info.AgentMethods[i];
             var comma = i < info.AgentMethods.Count - 1 ? "," : "";
-            sb.AppendLine($"            global::Microsoft.Extensions.AI.AIFunctionFactory.Create({info.AgentMethods[i]}){comma}");
+            var createCall = $"global::Microsoft.Extensions.AI.AIFunctionFactory.Create({m.Name})";
+            var line = m.NeedAgree
+                ? $"            new global::Microsoft.Extensions.AI.ApprovalRequiredAIFunction({createCall}){comma}"
+                : $"            {createCall}{comma}";
+            sb.AppendLine(line);
         }
 
         sb.AppendLine("        ];");
@@ -209,18 +216,30 @@ public class FunctionFactoryGenerator : IIncrementalGenerator
         public string FullTypeName { get; }
         public string ClassName { get; }
         public string Namespace { get; }
-        public List<string> AgentMethods { get; }
+        public List<MethodInfo> AgentMethods { get; }
 
         public ToolsClassInfo(
             string fullTypeName,
             string className,
             string @namespace,
-            List<string> agentMethods)
+            List<MethodInfo> agentMethods)
         {
             FullTypeName = fullTypeName;
             ClassName = className;
             Namespace = @namespace;
             AgentMethods = agentMethods;
+        }
+    }
+
+    private sealed class MethodInfo
+    {
+        public string Name { get; }
+        public bool NeedAgree { get; }
+
+        public MethodInfo(string name, bool needAgree)
+        {
+            Name = name;
+            NeedAgree = needAgree;
         }
     }
 }

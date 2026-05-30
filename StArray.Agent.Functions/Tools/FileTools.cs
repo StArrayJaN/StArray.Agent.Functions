@@ -9,16 +9,26 @@ namespace StArray.Agent.Functions.Tools;
 /// </summary>
 public partial class FileTools : ITools
 {
+    private const string RES_FILE_PATH_KEY = "Tool_File_FilePath";
+    private const string RES_DIRECTORY_PATH_KEY = "Tool_File_DirectoryPath";
     [AgentTool("Tool_File_Exists")]
     public ToolResult<bool> Exists(
-        [ToolParameter("Tool_File_Exists_path")] string path)
+        [ToolParameter(RES_FILE_PATH_KEY)] string path)
     {
         return ToolResult<bool>.Success(File.Exists(path));
+    }
+    
+    [AgentTool("Tool_File_ListFiles")]
+    public ToolResult<string[]> ListFiles(
+        [ToolParameter(RES_DIRECTORY_PATH_KEY)] string path,
+        [ToolParameter("Tool_File_ListFiles_recursive")] bool recursive = false)
+    {
+        return ToolResult<string[]>.Success(recursive ? Directory.GetFiles(path, "*", SearchOption.AllDirectories) : Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly));
     }
 
     [AgentTool("Tool_File_ReadAllText")]
     public ToolResult<string> ReadAllText(
-        [ToolParameter("Tool_File_ReadAllText_path")] string path)
+        [ToolParameter(RES_FILE_PATH_KEY)] string path)
     {
         try
         {
@@ -32,7 +42,7 @@ public partial class FileTools : ITools
 
     [AgentTool("Tool_File_WriteAllText")]
     public ToolResult<string> WriteAllText(
-        [ToolParameter("Tool_File_WriteAllText_path")] string path,
+        [ToolParameter(RES_FILE_PATH_KEY)] string path,
         [ToolParameter("Tool_File_WriteAllText_content")] string content)
     {
         try
@@ -47,7 +57,7 @@ public partial class FileTools : ITools
     }
 
     [AgentTool("Tool_FileTools_ReadFileContent")]
-    public ToolResult<string> ReadFileContent([ToolParameter("Tool_FileTools_ReadFileContent_path")] string path,
+    public ToolResult<string> ReadFileContent([ToolParameter(RES_FILE_PATH_KEY)] string path,
         [ToolParameter("Tool_FileTools_ReadFileContent_startLine")] int startLine,
         [ToolParameter("Tool_FileTools_ReadFileContent_rangeLines")] int rangeLines)
     {
@@ -72,7 +82,7 @@ public partial class FileTools : ITools
     }
     
     [AgentTool("Tool_File_ReplaceStringInFile")]
-    public ToolResult<string> ReplaceStringInFile([ToolParameter("Tool_File_ReplaceStringInFile_path")] string path,
+    public ToolResult<string> ReplaceStringInFile([ToolParameter(RES_FILE_PATH_KEY)] string path,
         [ToolParameter("Tool_File_ReplaceStringInFile_oldValue")] string oldValue,
         [ToolParameter("Tool_File_ReplaceStringInFile_newValue")] string newValue,
         [ToolParameter("Tool_File_ReplaceStringInFile_isRegex")] bool isRegex = false)
@@ -89,6 +99,77 @@ public partial class FileTools : ITools
             return ToolResult<string>.Success("替换成功。");
         } catch (Exception e) {
             return ToolResult<string>.Failure($"替换文件内容失败：{e.Message}");
+        }
+    }
+
+    [AgentTool("Tool_File_Delete")]
+    public ToolResult<string> Delete([ToolParameter("Tool_File_Delete_path")] string path)
+    {
+        try
+        {
+            File.Delete(path);
+            return ToolResult<string>.Success("删除成功。");
+        }
+        catch (Exception e)
+        {
+            return ToolResult<string>.Failure($"删除文件失败：{e.Message}");
+        }
+    }
+    
+    [AgentTool("Tool_File_SearchContentInFiles")]
+    public ToolResult<string> SearchContentInFiles([ToolParameter("Tool_File_SearchContentInFiles_paths")] string[] paths,
+        [ToolParameter("Tool_File_SearchContentInFiles_content")] string content,
+        [ToolParameter("Tool_File_SearchContentInFiles_isRegex")] bool isRegex = false)
+    { 
+        try
+        {
+            List<string> result = new();
+            foreach (string path in paths)
+            {
+                if (!File.Exists(path))
+                {
+                    continue;
+                }
+                string fileContent = File.ReadAllText(path);
+                if (isRegex)
+                {
+                    if (System.Text.RegularExpressions.Regex.IsMatch(fileContent, content))
+                    {
+                        result.Add($"文件：{path}");
+                    }
+                }
+                else
+                {
+                    if (fileContent.Contains(content))
+                    {
+                        result.Add($"文件：{path}");
+                    }
+                }
+            }
+            return ToolResult<string>.Success(string.Join("\n", result));
+        } catch (Exception e)
+        {
+            return ToolResult<string>.Failure($"搜索文件内容失败：{e.Message}");
+        }
+    }
+    
+    [AgentTool("Tool_File_GetCurrentDirectory")]
+    public ToolResult<string> GetCurrentDirectory()
+    {
+        return ToolResult<string>.Success(Directory.GetCurrentDirectory());
+    }
+    
+    [AgentTool("Tool_File_ChangeWorkingDirectory")]
+    public ToolResult<string> ChangeWorkingDirectory(
+        [ToolParameter(RES_DIRECTORY_PATH_KEY)] string path)
+    {
+        try
+        {
+            Directory.SetCurrentDirectory(path);
+            return ToolResult<string>.Success("更改工作目录成功。");
+        } catch (Exception e)
+        {
+            return ToolResult<string>.Failure($"更改工作目录失败：{e.Message}");
         }
     }
 }

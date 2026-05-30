@@ -45,4 +45,5 @@ public readonly record struct ToolResult<TResult>
     /// <param name="errorMessage">错误信息。The error message.</param>
     /// <returns>失败的工具结果。A failed tool result.</returns>
     public static ToolResult<TResult> Failure(string errorMessage) => new(default, false, errorMessage);
+    public static implicit operator TResult?(ToolResult<TResult> result) => result.Result ?? default;
 }
