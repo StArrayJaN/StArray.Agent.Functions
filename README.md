@@ -1,23 +1,23 @@
-# StArray.Agent.Functions
+# StArray.Agents.Functions
 
 .NET Agent 工具函数库，基于 Microsoft Agent Framework (MAF)。
 
 ## 项目结构
 
 ```
-StArray.Agent.Functions/
-  StArray.Agent.Functions/           -- 主项目
+StArray.Agents.Functions/
+  StArray.Agents.Functions/           -- 主项目
     Annotations/                     -- AgentToolAttribute, ToolParameterAttribute, NotToolAttribute
     Core/                            -- FunctionFactory, ToolResult<T>
     Tools/                           -- 工具实现 (MathTools, FileTools, TimeTools, TextTools, CodeTools)
       Win32/                         -- WindowTools
     Resources/                       -- 本地化 (.resx)
-  StArray.Agent.Functions.Diagnostics/  -- 诊断项目
+  StArray.Agents.Functions.Diagnostics/  -- 诊断项目
     FunctionFactoryGenerator         -- 源生成器：扫描 partial ITools 类，自动生成 GetTools()
     AgentToolParameterAnalyzer       -- 分析器：SAF0001 / SAF0002 诊断
     AgentToolParameterCodeFixProvider -- CodeFix：自动添加/移除特性
     Resources/                       -- 分析器本地化
-  StArray.Agent.Functions.Tests/     -- 测试项目
+  StArray.Agents.Functions.Tests/     -- 测试项目
 ```
 
 ## 快速开始
