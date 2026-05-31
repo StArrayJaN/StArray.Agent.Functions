@@ -41,6 +41,62 @@ var tools = FunctionFactory.MyTools.GetTools();
 var agent = new ChatClientAgent(...) { Tools = tools };
 ```
 
+## FunctionFactory API
+
+`FunctionFactory` 提供两种工具管理模式：
+
+### 内置工具（编译时）
+
+源生成器扫描所有 `partial class : ITools` 并自动生成静态属性，可直接使用：
+
+```csharp
+// 单个工具集
+var mathTools = FunctionFactory.MathTools.GetTools();
+var fileTools = FunctionFactory.FileTools.GetTools();
+
+// 全部内置工具
+var allBuiltIn = FunctionFactory.GetAllFunctions();
+```
+
+### 自定义工具（运行时）
+
+用户可以在运行时动态注册自定义工具集：
+
+```csharp
+public class MyCustomTools : ITools
+{
+    public List<AIFunction> GetTools() { /* ... */ }
+}
+
+// 注册
+FunctionFactory.AddTools(new MyCustomTools());
+// 或指定键名
+FunctionFactory.AddTools("my", new MyCustomTools());
+
+// 获取全部工具（内置 + 自定义）
+var all = FunctionFactory.GetAllFunctions();
+
+// 按类型获取
+var myTools = FunctionFactory.GetCustomTools<MyCustomTools>();
+
+// 获取所有自定义工具快照
+var allCustom = FunctionFactory.GetCustomTools();
+
+// 移除 / 清空
+FunctionFactory.RemoveTools<MyCustomTools>();
+FunctionFactory.ClearCustomTools();
+```
+
+| 方法 | 说明 |
+|------|------|
+| `AddTools<T>(T tools)` | 按类型注册自定义工具集 |
+| `AddTools<T>(string key, T tools)` | 按指定键名注册 |
+| `RemoveTools<T>()` | 按类型移除 |
+| `ClearCustomTools()` | 清空所有自定义工具 |
+| `GetCustomTools()` | 获取所有自定义工具快照 |
+| `GetCustomTools<T>()` | 按类型获取，强类型返回 |
+| `GetAllFunctions()` | 内置 + 自定义全部工具 |
+
 ## 工具方法规范
 
 - 类必须为 `partial class` 并实现 `ITools`
